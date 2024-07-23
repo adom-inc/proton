@@ -1,5 +1,7 @@
 # Proton
 
+![Rust](https://github.com/adom-inc/proton/actions/workflows/rust.yml/badge.svg)
+
 An open-source library for Wi-Fi access point management.
 
 ## License
