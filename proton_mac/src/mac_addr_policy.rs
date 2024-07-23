@@ -114,3 +114,68 @@ impl MacAddrPolicy {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn create_public_mac_policy() {
+        // Create a public MAC address policy
+        let policy = MacAddrPolicy::public();
+
+        // Define arbitrary MAC addresses
+        let mac1 = MacAddr::new(32, 103, 244, 102, 34, 1);
+        let mac2 = MacAddr::new(250, 33, 39, 3, 48, 73);
+        let mac3 = MacAddr::new(49, 123, 86, 38, 20, 67);
+        
+        // Check MAC addresses
+        assert!(policy.check(mac1));
+        assert!(policy.check(mac2));
+        assert!(policy.check(mac3));
+    }
+
+    #[test]
+    fn create_whitelist_mac_policy() {
+        // Create a whitelist MAC address policy
+        let mut policy = MacAddrPolicy::whitelist();
+
+        // Define arbitrary MAC addresses
+        let mac1 = MacAddr::new(32, 103, 244, 102, 34, 1);
+        let mac2 = MacAddr::new(250, 33, 39, 3, 48, 73);
+        let mac3 = MacAddr::new(49, 123, 86, 38, 20, 67);
+
+        // Allow one address on the policy
+        let result = policy.allow(mac1);
+
+        // Check for successful whitelisting
+        assert_eq!(result, Ok (()));
+        
+        // Check MAC addresses
+        assert!(policy.check(mac1));
+        assert!(!policy.check(mac2));
+        assert!(!policy.check(mac3));
+    }
+
+    #[test]
+    fn create_blacklist_mac_policy() {
+        // Create a blacklist MAC address policy
+        let mut policy = MacAddrPolicy::blacklist();
+
+        // Define arbitrary MAC addresses
+        let mac1 = MacAddr::new(32, 103, 244, 102, 34, 1);
+        let mac2 = MacAddr::new(250, 33, 39, 3, 48, 73);
+        let mac3 = MacAddr::new(49, 123, 86, 38, 20, 67);
+
+        // Deny one address on the policy
+        let result = policy.deny(mac1);
+
+        // Check for successful blacklisting
+        assert_eq!(result, Ok(()));
+        
+        // Check MAC addresses
+        assert!(!policy.check(mac1));
+        assert!(policy.check(mac2));
+        assert!(policy.check(mac3));
+    }
+}

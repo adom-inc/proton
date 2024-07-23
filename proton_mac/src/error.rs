@@ -5,7 +5,7 @@ use std::{
     fmt,
 };
 
-#[derive(Clone, Copy, Debug)]
+#[derive(PartialEq, Eq, Clone, Copy, Debug)]
 #[non_exhaustive]
 /// A MAC address policy error.
 pub enum MacAddrPolicyError {
