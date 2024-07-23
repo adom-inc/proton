@@ -46,7 +46,7 @@ impl ArpManager {
     /// None.
     /// 
     /// # Returns
-    /// An `ArpResult` indicating whether or not the scan was successful.
+    /// None.
     pub async fn scan(&mut self) -> ArpResult {
         let mut addresses = Vec::new();
 
@@ -61,7 +61,7 @@ impl ArpManager {
         }
 
         // Scan the network and update the cache
-        self.cache.set(scan(addresses).await);
+        self.cache.set(scan(addresses).await?);
 
         Ok (())
     }
@@ -77,7 +77,7 @@ impl ArpManager {
         let addresses = self.cache.get_stale_ips();
 
         // Scan the network and update the cache
-        self.cache.set(scan(addresses).await);
+        self.cache.set(scan(addresses).await?);
 
         Ok (())
     }

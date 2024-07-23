@@ -4,7 +4,13 @@ use std::net::Ipv4Addr;
 
 use tokio::task;
 
-use crate::ArpCacheEntry;
+use crate::{
+    ArpCacheEntry,
+    ArpError,
+};
+
+/// Result type for network scans.
+type ScanResult = Result<Vec<ArpCacheEntry>, ArpError>;
 
 /// Scan the provided list of IPv4 addresses and return all ARP responses.
 /// 
@@ -12,8 +18,9 @@ use crate::ArpCacheEntry;
 /// - `ips` (`Vec<Ipv4Addr>`): the IPv4 addresses to scan
 /// 
 /// # Returns
-/// A `Vec<ArpCacheEntry>` containing the ARP responses received.
-pub async fn scan(ips: Vec<Ipv4Addr>) -> Vec<ArpCacheEntry> {
+/// A `Result<Vec<ArpCacheEntry>, ArpError>` containing the ARP responses
+/// received, if the scan was successful.
+pub async fn scan(ips: Vec<Ipv4Addr>) -> ScanResult {
     // Begin listening for ARP replies
     let rx_task = task::spawn(request(ips));
 
