@@ -1,4 +1,4 @@
-//! Network Address Translation for the PARTICLE.
+//! Network Address Translation for the Proton access point management library.
 
 #![deny(warnings)]
 #![deny(missing_docs)]

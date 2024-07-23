@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+    "proton_mac",
     "proton_nat",
 ]
 
@@ -8,6 +9,9 @@ members = [
 name = "proton"
 version = "0.1.0"
 edition = "2021"
+
+[dependencies.proton_mac]
+path = "proton_mac"
 
 [dependencies.proton_nat]
 path = "proton_nat"
