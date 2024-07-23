@@ -14,7 +14,7 @@ use crate::{
 };
 
 /// An address resolution manager that provides ARP caching
-/// and requests/response handling.
+/// and ARP request/reply handling.
 pub struct ArpManager {
     /// The CIDR range of the network
     range: Ipv4Cidr,
