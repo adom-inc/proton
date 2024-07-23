@@ -7,7 +7,7 @@ use std::net::{
 
 use bimap::BiMap;
 
-/// Abstracts over an OSI Layer 4 (Transport Layer) port.
+/// OSI Layer 4 (Transport Layer) port.
 type Layer4Port = u16;
 
 /// Minimum Layer 4 port used.
@@ -16,7 +16,10 @@ const MINIMUM_NAT_PORT: Layer4Port = 50_000;
 /// Maximum Layer 4 port permitted (inclusive).
 const MAXIMUM_NAT_PORT: Layer4Port = u16::MAX;
 
-/// Define a NAT table.
+/// A Network Address Translation table.
+/// 
+/// This table provides a bijective mapping (with the help of the external crate `bimap`) to
+/// translate between internal IPv4 sockets and external IPv4 sockets.
 pub struct NatTable {
     /// A bijective mapping.  The left element indicates the
     /// internal address and the right element indicates the
@@ -39,11 +42,12 @@ pub struct NatTable {
 impl NatTable {
     /// Construct a new NAT table.
     /// 
-    /// Parameters:
+    /// # Parameters
     /// - `ips` (`Vec<IPv4Addr>`): a list of external IPv4 addresses
     ///   available for NAT
     /// 
-    /// Returns: a new `NatTable`.
+    /// # Returns
+    /// A new `NatTable`.
     pub fn new(ips: Vec<Ipv4Addr>) -> Self {
         Self {
             table: BiMap::new(),
@@ -56,27 +60,33 @@ impl NatTable {
 
     /// Get the length of the NAT table.
     /// 
-    /// Parameters: none.
+    /// # Parameters
+    /// None.
     /// 
-    /// Returns: `usize` of the length of the table.
+    /// # Returns
+    /// A `usize` of the length of the table.
     pub fn len(&self) -> usize {
         self.table.len()
     }
 
     /// Get the number of available sockets.
     /// 
-    /// Parameters: none.
+    /// # Parameters
+    /// None.
     /// 
-    /// Returns: `usize` with the number of available sockets.
+    /// # Returns
+    /// A `usize` with the number of available sockets.
     pub fn available(&self) -> usize {
         self.available
     }
 
     /// Get the next available socket.
     /// 
-    /// Parameters: none.
+    /// # Parameters
+    /// None.
     /// 
-    /// Returns: `Option<SocketAddrV4>` with the next unused external
+    /// # Returns
+    /// `Option<SocketAddrV4>` with the next unused external
     /// socket, if available.
     fn get_next_socket(&mut self) -> Option<SocketAddrV4> {
         // Get IPv4 address
@@ -104,9 +114,11 @@ impl NatTable {
 
     /// Free the last used socket.
     /// 
-    /// Parameters: none.
+    /// # Parameters
+    /// None.
     /// 
-    /// Returns: `Option<SocketAddrV4>` with the freed socket,
+    /// # Returns
+    /// `Option<SocketAddrV4>` with the freed socket,
     /// if available.
     fn free_last_socket(&mut self) -> Option<SocketAddrV4> {
         // Make sure at least one socket has been used,
@@ -140,11 +152,12 @@ impl NatTable {
 
     /// Add a NAT entry.
     ///
-    /// Parameters:
+    /// # Parameters
     /// - `internal` (`SocketAddrV4`): the internal IPv4 socket address
     ///
-    /// Returns: `Option<SocketAddrV4>` containing the external IPv4 socket
-    /// address, if another port was available and insertion was successful.
+    /// # Returns
+    /// `Option<SocketAddrV4>` containing the external IPv4 socket
+    /// address, if another port was available and addition was successful.
     pub fn add(&mut self, internal: SocketAddrV4) -> Option<SocketAddrV4> {
         // Get the next available socket
         let external = self.get_next_socket();
@@ -164,10 +177,11 @@ impl NatTable {
 
     /// Delete a NAT entry, freeing the external address for later use.
     /// 
-    /// Parameters:
+    /// # Parameters
     /// - `internal` (`SocketAddrV4`): the internal IPv4 socket address
     ///
-    /// Returns: `Option<SocketAddrV4>` of the external address that was freed,
+    /// # Returns
+    /// `Option<SocketAddrV4>` of the external address that was freed,
     /// if it existed.
     pub fn delete(&mut self, internal: SocketAddrV4) -> Option<SocketAddrV4> {
         // Remove the address from the table, if it exists
@@ -190,10 +204,11 @@ impl NatTable {
     /// Look up an external address by internal address.
     /// This is used for Source Network Address Translation (SNAT).
     /// 
-    /// Parameters:
+    /// # Parameters
     /// - `internal` (`SocketAddrV4`): the internal IPv4 socket address
     /// 
-    /// Returns: none.
+    /// # Returns
+    /// None.
     pub fn translate_source(&self, internal: SocketAddrV4) -> Option<SocketAddrV4> {
         self.table.get_by_left(&internal).copied()
     }
@@ -201,10 +216,11 @@ impl NatTable {
     /// Look up an internal address by external address.
     /// This is used for Destination Network Address Translation (DNAT).
     /// 
-    /// Parameters:
+    /// # Parameters
     /// - `external` (`SocketAddrV4`): the external IPv4 socket address
     /// 
-    /// Returns: none.
+    /// # Returns
+    /// None.
     pub fn translate_destination(&self, external: SocketAddrV4) -> Option<SocketAddrV4> {
         self.table.get_by_right(&external).copied()
     }

@@ -1,4 +1,4 @@
-//! Provide Network Address Translation to the PARTICLE.
+//! Network Address Translation for the PARTICLE.
 
 #![deny(warnings)]
 #![deny(missing_docs)]
