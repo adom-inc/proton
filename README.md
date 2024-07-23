@@ -8,4 +8,10 @@ This project is maintained and developed by Adom Industries, Inc.  It is release
 
 ## Documentation
 
-Coming soon!
+Clone this repository to your local machine.
+
+Execute the following command to build the documentation and open it in a web browser.
+
+```
+$ cargo doc --open
+```
