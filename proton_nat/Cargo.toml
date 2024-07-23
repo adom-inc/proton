@@ -8,3 +8,4 @@ name = "proton_nat"
 path = "src/lib.rs"
 
 [dependencies]
+bimap = "0.6.3"
