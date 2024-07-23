@@ -305,6 +305,7 @@ dependencies = [
  "proton_mac",
  "proton_nat",
  "proton_nif",
+ "proton_wap",
 ]
 
 [[package]]
@@ -337,6 +338,14 @@ version = "0.1.0"
 dependencies = [
  "pnet",
  "tokio",
+]
+
+[[package]]
+name = "proton_wap"
+version = "0.1.0"
+dependencies = [
+ "pnet",
+ "proton_nat",
 ]
 
 [[package]]

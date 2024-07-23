@@ -2,3 +2,5 @@
 
 #![deny(warnings)]
 #![deny(missing_docs)]
+
+pub use proton_wap::AccessPoint;

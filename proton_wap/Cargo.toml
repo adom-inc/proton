@@ -1,0 +1,14 @@
+[package]
+name = "proton_wap"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "proton_wap"
+path = "src/lib.rs"
+
+[dependencies.pnet]
+version = "0.35.0"
+
+[dependencies.proton_nat]
+path = "../proton_nat"

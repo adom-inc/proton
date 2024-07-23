@@ -5,6 +5,7 @@ members = [
     "proton_mac",
     "proton_nat",
     "proton_nif",
+    "proton_wap",
 ]
 
 [package]
@@ -23,3 +24,6 @@ path = "proton_nat"
 
 [dependencies.proton_nif]
 path = "proton_nif"
+
+[dependencies.proton_wap]
+path = "proton_wap"
