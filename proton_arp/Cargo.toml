@@ -1,0 +1,15 @@
+[package]
+name = "proton_arp"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "proton_arp"
+path = "src/lib.rs"
+
+[dependencies.tokio]
+version = "1"
+features = ["full"]
+
+[dependencies.pnet]
+version = "0.35.0"
