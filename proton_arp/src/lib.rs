@@ -18,9 +18,7 @@ pub use cache::{
     ArpCacheIterator,
 };
 
-pub use error::{
-    ArpError,
-};
+pub use error::ArpError;
 
 pub use scan::scan;
 

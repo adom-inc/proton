@@ -4,6 +4,7 @@ members = [
     "proton_arp",
     "proton_mac",
     "proton_nat",
+    "proton_nif",
 ]
 
 [package]
@@ -19,3 +20,6 @@ path = "proton_mac"
 
 [dependencies.proton_nat]
 path = "proton_nat"
+
+[dependencies.proton_nif]
+path = "proton_nif"

@@ -1,14 +1,11 @@
 [package]
-name = "proton_arp"
+name = "proton_nif"
 version = "0.1.0"
 edition = "2021"
 
 [lib]
-name = "proton_arp"
+name = "proton_nif"
 path = "src/lib.rs"
-
-[dependencies]
-cidr = "0.2.3"
 
 [dependencies.tokio]
 version = "1"
@@ -17,5 +14,7 @@ features = ["full"]
 [dependencies.pnet]
 version = "0.35.0"
 
-[dependencies.proton_nif]
-path = "../proton_nif"
+[features]
+default = ["cndn"]
+ethx = []
+cndn = []

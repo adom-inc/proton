@@ -1,4 +1,4 @@
-//! MAC address policy.
+//! MAC address policy abstraction.
 
 use pnet::datalink::MacAddr;
 

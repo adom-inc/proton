@@ -304,6 +304,7 @@ dependencies = [
  "proton_arp",
  "proton_mac",
  "proton_nat",
+ "proton_nif",
 ]
 
 [[package]]
@@ -312,6 +313,7 @@ version = "0.1.0"
 dependencies = [
  "cidr",
  "pnet",
+ "proton_nif",
  "tokio",
 ]
 
@@ -327,6 +329,14 @@ name = "proton_nat"
 version = "0.1.0"
 dependencies = [
  "bimap",
+]
+
+[[package]]
+name = "proton_nif"
+version = "0.1.0"
+dependencies = [
+ "pnet",
+ "tokio",
 ]
 
 [[package]]

@@ -50,7 +50,7 @@ impl ArpCache {
     /// None.
     pub fn add(&mut self, ipv4: Ipv4Addr, mac: MacAddr) {
         // Create a cache entry
-        let entry = ArpCacheEntry::new(ipv4, mac, self.refresh);
+        let entry = ArpCacheEntry::new(ipv4, mac);
 
         // Add the entry to the cache
         self.cache.push(entry);
@@ -79,7 +79,7 @@ impl ArpCache {
 
         for entry in &self.cache {
             // Check if the entry needs to be refreshed
-            if entry.check() {
+            if entry.check(self.refresh) {
                 stale_ips.push(entry.ipv4);
             }
         }
@@ -140,9 +140,6 @@ pub struct ArpCacheEntry {
 
     /// The time that this entry was created.
     created: Instant,
-
-    /// The amount of time after which this entry needs to be refreshed.
-    refresh: Duration,
 }
 
 impl ArpCacheEntry {
@@ -151,30 +148,29 @@ impl ArpCacheEntry {
     /// # Parameters
     /// - `ipv4` (`Ipv4Addr`): the IPv4 address of the device
     /// - `mac` (`MacAddr`): the MAC address of the device
-    /// - `refresh` (`Duration`): the refresh time of this cache entry
     /// 
     /// # Returns
     /// A new `ArpCacheEntry` corresponding to the provided MAC address.
-    pub fn new(ipv4: Ipv4Addr, mac: MacAddr, refresh: Duration) -> Self {
+    pub fn new(ipv4: Ipv4Addr, mac: MacAddr) -> Self {
         Self {
             ipv4,
             mac,
             created: Instant::now(),
-            refresh,
         }
     }
 
     /// Check if this entry needs to be refreshed (as of call time).
     /// 
     /// # Parameters
-    /// None.
+    /// - `refresh` (`Duration`): the amount of time after which this entry
+    /// should be refreshed.
     /// 
     /// # Returns
     /// A `bool` indicating whether or not this entry should be refreshed.
-    pub fn check(&self) -> bool {
+    pub fn check(&self, refresh: Duration) -> bool {
         // Check the time
         let now = Instant::now();
 
-        now - self.created >= self.refresh
+        now - self.created >= refresh
     }
 }
