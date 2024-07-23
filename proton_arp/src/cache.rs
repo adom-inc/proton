@@ -11,8 +11,6 @@ use std::{
 
 use pnet::datalink::MacAddr;
 
-use crate::ArpResult;
-
 #[derive(Clone)]
 /// An address resolution cache.
 /// 
@@ -58,22 +56,35 @@ impl ArpCache {
         self.cache.push(entry);
     }
 
-    /// Refresh the ARP cache.
+    /// Update the ARP cache.
+    /// 
+    /// # Parameters
+    /// - `cache` (`Vec<ArpCacheEntry>`): a new cache list
+    /// 
+    /// # Returns
+    /// None.
+    pub fn set(&mut self, cache: Vec<ArpCacheEntry>) {
+        self.cache = cache;
+    }
+
+    /// Get a list of stale addresses in the ARP cache.
     /// 
     /// # Parameters
     /// None.
     /// 
     /// # Returns
-    /// An `ArpResult` indicating whether or not the refresh was successful.
-    pub fn refresh(&mut self) -> ArpResult {
+    /// A `Vec<Ipv4Addr>` with a list of stale IPv4 addresses to check.
+    pub fn get_stale_ips(&mut self) -> Vec<Ipv4Addr> {
+        let mut stale_ips = Vec::new();
+
         for entry in &self.cache {
             // Check if the entry needs to be refreshed
             if entry.check() {
-                todo!()
+                stale_ips.push(entry.ipv4);
             }
         }
 
-        Ok (())
+        stale_ips
     }
 }
 

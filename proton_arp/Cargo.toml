@@ -7,6 +7,9 @@ edition = "2021"
 name = "proton_arp"
 path = "src/lib.rs"
 
+[dependencies]
+cidr = "0.2.3"
+
 [dependencies.tokio]
 version = "1"
 features = ["full"]
