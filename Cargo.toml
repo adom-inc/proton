@@ -1,7 +1,13 @@
+[workspace]
+resolver = "2"
+members = [
+    "proton_nat",
+]
+
 [package]
 name = "proton"
 version = "0.1.0"
 edition = "2021"
 
-[dependencies]
-pnet = "0.35.0"
+[dependencies.proton_nat]
+path = "proton_nat"

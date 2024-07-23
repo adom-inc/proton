@@ -1,0 +1,10 @@
+[package]
+name = "proton_nat"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "proton_nat"
+path = "src/lib.rs"
+
+[dependencies]
