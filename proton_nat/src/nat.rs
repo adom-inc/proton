@@ -1,8 +1,11 @@
 //! Network Address Translation (NAT) table.
 
-use std::net::{
-    Ipv4Addr,
-    SocketAddrV4,
+use std::{
+    cmp::Ordering,
+    net::{
+        Ipv4Addr,
+        SocketAddrV4,
+    },
 };
 
 use bimap::BiMap;
@@ -39,6 +42,7 @@ pub struct NatTable {
     available: usize,
 }
 
+#[allow(clippy::len_without_is_empty)]
 impl NatTable {
     /// Construct a new NAT table.
     /// 
@@ -96,17 +100,17 @@ impl NatTable {
         let port = self.next_port;
 
         // Increment next port
-        if self.next_port < MAXIMUM_NAT_PORT {
-            self.next_port += 1;
-        } else if self.next_port == MAXIMUM_NAT_PORT {
-            if self.ip_index + 1 < self.ips.len() {
+        match self.next_port.cmp(&MAXIMUM_NAT_PORT) {
+            Ordering::Less => self.next_port += 1,
+            Ordering::Equal => if self.ip_index + 1 < self.ips.len() {
                 // We have another IP address
                 self.ip_index += 1;
                 self.next_port = MINIMUM_NAT_PORT;
             } else {
                 // We are out of IP addresses
                 return None;
-            }
+            },
+            Ordering::Greater => unreachable!(),
         }
 
         Some (SocketAddrV4::new(ipv4, port))
@@ -128,12 +132,10 @@ impl NatTable {
         }
 
         // Get the last used port number
-        let port = if self.next_port > MINIMUM_NAT_PORT {
-            self.next_port - 1
-        } else if self.next_port == MINIMUM_NAT_PORT {
-            MAXIMUM_NAT_PORT
-        } else {
-            unreachable!()
+        let port = match self.next_port.cmp(&MINIMUM_NAT_PORT) {
+            Ordering::Less => unreachable!(),
+            Ordering::Equal => MAXIMUM_NAT_PORT,
+            Ordering::Greater => self.next_port - 1,
         };
 
         // Get the last used IP address
@@ -187,7 +189,7 @@ impl NatTable {
         // Remove the address from the table, if it exists
         let external = self.table.remove_by_left(&internal);
 
-        let socket = if let Some (_) = external {
+        let socket = if external.is_some() {
             // Free the last used socket, returning the freed address
             self.free_last_socket()
         } else {
