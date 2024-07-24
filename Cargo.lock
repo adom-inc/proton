@@ -410,6 +410,7 @@ dependencies = [
 name = "proton_wap"
 version = "0.1.0"
 dependencies = [
+ "cidr",
  "pnet",
  "proton_nat",
 ]

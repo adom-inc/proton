@@ -1,29 +1,51 @@
 //! Wireless access point abstraction.
 
-use std::net::{
-    Ipv4Addr,
-    SocketAddrV4,
+use std::{
+    io,
+    net::{
+        Ipv4Addr,
+        SocketAddrV4,
+    },
 };
 
-use pnet::packet::{
-    ipv4::{
-        Ipv4Packet,
-        MutableIpv4Packet,
+use cidr::Ipv4Cidr;
+
+use pnet::{
+    packet::{
+        ip::IpNextHeaderProtocols,
+        ipv4::{
+            Ipv4Packet,
+            MutableIpv4Packet,
+        },
+        tcp::{
+            TcpPacket,
+            MutableTcpPacket,
+        },
+        Packet,
+        MutablePacket,
     },
-    tcp::{
-        TcpPacket,
-        MutableTcpPacket,
+    transport::{
+        TransportChannelType::Layer4,
+        TransportProtocol::Ipv4,
+        transport_channel,
+        ipv4_packet_iter,
     },
-    Packet,
-    MutablePacket,
 };
 
 use proton_nat::NatTable;
+
+use crate::AccessPointResult;
+
+/// Transport channel buffer size.
+pub const TRANSPORT_CHANNEL_BUFFER_SIZE: usize = 4_096;
 
 /// A wireless access point.
 pub struct AccessPoint {
     /// Network Address Translation (NAT) table.
     nat: NatTable,
+
+    /// CIDR network range.
+    range: Ipv4Cidr,
 }
 
 impl AccessPoint {
@@ -31,13 +53,78 @@ impl AccessPoint {
     /// 
     /// # Parameters
     /// - `external_ipv4` (`Ipv4Addr`): the external IPv4 address assigned
-    /// to this access point.
+    /// to this access point
+    /// - `range` (`Ipv4Cidr`): the internal network range associated to
+    /// this access point
     /// 
     /// # Returns
     /// A new `AccessPoint`.
-    pub fn new(external_ipv4: Ipv4Addr) -> Self {
+    pub fn new(external_ipv4: Ipv4Addr, range: Ipv4Cidr) -> Self {
         Self {
             nat: NatTable::new(vec![external_ipv4]),
+            range,
+        }
+    }
+
+    /// Continuously route packets on the Transport Layer (OSI Layer 4).
+    /// 
+    /// # Parameters
+    /// None.
+    /// 
+    /// # Returns
+    /// An `AccessPointResult` indicating an error, if one occurred.
+    /// 
+    /// This function does not return if there are no errors.
+    pub fn run(&mut self) -> AccessPointResult {
+        // Create an IPv4 protocol
+        let protocol = Layer4 (Ipv4 (IpNextHeaderProtocols::Ipv4));
+
+        // Create a new transport protocol 
+        let (mut tx, mut rx) = match transport_channel(TRANSPORT_CHANNEL_BUFFER_SIZE, protocol) {
+            Ok ((tx, rx)) => (tx, rx),
+            Err (_) => return Err (io::Error::new(io::ErrorKind::Other, "could not open transport channel")),
+        };
+
+        // We treat received packets as if they were IPv4 packets
+        let mut iter = ipv4_packet_iter(&mut rx);
+
+        // Continuously iterate through the packets on the receiving line
+        loop {
+            match iter.next() {
+                Ok ((packet, addr)) => {
+                    // Allocate enough space for a new packet
+                    let mut vec: Vec<u8> = vec![0; packet.packet().len()];
+                    let mut new_packet = MutableIpv4Packet::new(&mut vec[..]).unwrap();
+    
+                    // Create a clone of the original packet
+                    new_packet.clone_from(&packet);
+
+                    // Get source IPv4
+                    let source_ipv4: Ipv4Addr = new_packet.get_source();
+
+                    // Construct immutable packet
+                    let ipv4_packet = new_packet.to_immutable();
+
+                    // Detect NAT type and translate packet
+                    let translated_packet = if self.range.contains(&source_ipv4) {
+                        // Source NAT
+                        self.translate_outgoing_ipv4_packet(ipv4_packet)
+                    } else {
+                        // Destination NAT
+                        self.translate_incoming_ipv4_packet(ipv4_packet)
+                    }.ok_or(io::Error::new(io::ErrorKind::Other, "could not perform NAT"))?;
+    
+                    // Send the translated packet
+                    if tx.send_to(translated_packet, addr).is_err() {
+                        println!("Failed to send packet to address {}", addr);
+                    }
+                }
+                Err (e) => {
+                    // If an error occurs, we can handle it here
+                    println!("Failed to route packet: {:#?}", e);
+                    continue;
+                }
+            }
         }
     }
 
@@ -49,7 +136,7 @@ impl AccessPoint {
     /// # Returns
     /// An `Option<IPv4Packet>` with a translated source address and port number, if
     /// translation was successful.
-    pub fn translate_outgoing_ipv4_packet(&mut self, packet: Ipv4Packet) -> Option<Ipv4Packet> {
+    fn translate_outgoing_ipv4_packet(&mut self, packet: Ipv4Packet) -> Option<Ipv4Packet> {
         // Construct a mutable IPv4 packet
         let mut ip_packet = MutableIpv4Packet::owned(packet.packet().to_vec())?;
         
@@ -97,7 +184,7 @@ impl AccessPoint {
     /// # Returns
     /// An `Option<IPv4Packet>` with a translated destination address and port number, if
     /// translation was successful.
-    pub fn translate_incoming_ipv4_packet(&mut self, packet: Ipv4Packet) -> Option<Ipv4Packet> {
+    fn translate_incoming_ipv4_packet(&mut self, packet: Ipv4Packet) -> Option<Ipv4Packet> {
         // Construct a mutable IPv4 packet
         let mut ip_packet = MutableIpv4Packet::owned(packet.packet().to_vec())?;
         

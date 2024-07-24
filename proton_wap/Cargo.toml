@@ -7,6 +7,9 @@ edition = "2021"
 name = "proton_wap"
 path = "src/lib.rs"
 
+[dependencies]
+cidr = "0.2.3"
+
 [dependencies.pnet]
 version = "0.35.0"
 
