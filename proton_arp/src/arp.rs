@@ -1,10 +1,13 @@
 //! Address resolution manager.
 
 use std::{
+    net::Ipv4Addr,
     time::Duration,
 };
 
 use cidr::Ipv4Cidr;
+
+use pnet::datalink::MacAddr;
 
 use crate::{
     ArpCache,
@@ -30,7 +33,7 @@ impl ArpManager {
     /// - `range` (`Ipv4Cidr`): the CIDR range of the network
     /// - `refresh` (`Duration`): the amount of time after which ARP
     /// cache entries should be refreshed.
-    /// 
+    /// ArpCache
     /// # Returns
     /// A new `ArpManager` with an empty cache.
     pub fn new(range: Ipv4Cidr, refresh: Duration) -> Self {
@@ -91,5 +94,22 @@ impl ArpManager {
     /// An `ArpCacheIterator` over all IPv4 addresses and their corresponding MAC addresses.
     pub fn cache(&self) -> ArpCacheIterator {
         self.cache.clone().into_iter()
+    }
+
+    /// Look up a MAC address, returning its corresponding IPv4 if available.
+    /// 
+    /// # Parameters
+    /// - `mac` (`MacAddr`): the MAC address to look up
+    /// 
+    /// # Returns
+    /// An `Option<Ipv4Addr>` containing to the provided MAC address, if available.
+    pub fn lookup_mac(&self, mac: MacAddr) -> Option<Ipv4Addr> {
+        for entry in self.cache() {
+            if entry.mac == mac {
+                return Some (entry.ipv4);
+            }
+        }
+
+        None
     }
 }

@@ -1,0 +1,24 @@
+[package]
+name = "proton_dev"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "proton_dev"
+path = "src/lib.rs"
+
+[dependencies]
+cidr = "0.2.3"
+neli = "0.4.3-r1"
+nl80211 = "0.0.2"
+serde_json = "1.0.120"
+
+[dependencies.pnet]
+version = "0.35.0"
+
+[dependencies.serde]
+version = "1.0.204"
+features = ["derive"]
+
+[dependencies.proton_arp]
+path = "../proton_arp"

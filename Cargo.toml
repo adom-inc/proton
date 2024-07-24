@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
     "proton_arp",
+    "proton_dev",
     "proton_mac",
     "proton_nat",
     "proton_nif",
@@ -15,6 +16,9 @@ edition = "2021"
 
 [dependencies.proton_arp]
 path = "proton_arp"
+
+[dependencies.proton_dev]
+path = "proton_dev"
 
 [dependencies.proton_mac]
 path = "proton_mac"
