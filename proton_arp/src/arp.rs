@@ -1,9 +1,6 @@
 //! Address resolution manager.
 
-use std::{
-    net::Ipv4Addr,
-    time::Duration,
-};
+use std::net::Ipv4Addr;
 
 use cidr::Ipv4Cidr;
 
@@ -31,15 +28,13 @@ impl ArpManager {
     /// 
     /// # Parameters
     /// - `range` (`Ipv4Cidr`): the CIDR range of the network
-    /// - `refresh` (`Duration`): the amount of time after which ARP
-    /// cache entries should be refreshed.
-    /// ArpCache
+    /// 
     /// # Returns
     /// A new `ArpManager` with an empty cache.
-    pub fn new(range: Ipv4Cidr, refresh: Duration) -> Self {
+    pub fn new(range: Ipv4Cidr) -> Self {
         Self {
             range,
-            cache: ArpCache::new(refresh),
+            cache: ArpCache::new(),
         }
     }
 
@@ -62,22 +57,6 @@ impl ArpManager {
                 addresses.push(ipv4);
             }
         }
-
-        // Scan the network and update the cache
-        self.cache.set(scan(addresses).await?);
-
-        Ok (())
-    }
-
-    /// Refresh the cache without scanning for new devices.
-    /// 
-    /// # Parameters
-    /// None.
-    /// 
-    /// # Returns
-    /// An `ArpResult` indicating whether or not the refresh was successful.
-    pub async fn refresh(&mut self) -> ArpResult {
-        let addresses = self.cache.get_stale_ips();
 
         // Scan the network and update the cache
         self.cache.set(scan(addresses).await?);

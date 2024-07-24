@@ -1,7 +1,5 @@
 //! Device discovery manager.
 
-use std::time::Duration;
-
 use cidr::Ipv4Cidr;
 
 use neli::err::NlError;
@@ -38,16 +36,14 @@ impl DeviceManager {
     /// 
     /// # Parameters
     /// - `range` (`Ipv4Cidr`): the CIDR range of the network
-    /// - `refresh` (`Duration`): the amount of time after which to refresh
-    /// the ARP cache
     /// 
     /// # Returns
     /// The result type `NetlinkResult<DeviceManager>` containing the device
     /// manager, if its initialization was successful.
-    pub fn new(range: Ipv4Cidr, refresh: Duration) -> NetlinkResult<Self> {
+    pub fn new(range: Ipv4Cidr) -> NetlinkResult<Self> {
         Ok (Self {
             socket: Socket::connect()?,
-            arp_manager: ArpManager::new(range, refresh),
+            arp_manager: ArpManager::new(range),
         })
     }
 
@@ -59,7 +55,12 @@ impl DeviceManager {
     /// # Returns
     /// The result type `NetlinkResult<Vec<Device>>` containing a list of
     /// connected devices.
-    pub fn scan(&mut self, ifname: &str) -> NetlinkResult<Vec<Device>> {
+    pub async fn scan(&mut self, ifname: &str) -> NetlinkResult<Vec<Device>> {
+        // Perform an ARP scan of the network to get IPs
+        if self.arp_manager.scan().await.is_err() {
+            return Err (NlError::Msg ("could not scan network".to_string()));
+        };
+
         // Determine Wi-Fi device by name
         let check_wifi_device = |iface: &Interface| parse_string(&iface.name.clone().unwrap_or_default()) == ifname;
 

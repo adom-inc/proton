@@ -19,24 +19,19 @@ use pnet::datalink::MacAddr;
 pub struct ArpCache {
     /// Cache entries consisting of IPv4 addresses, MAC addresses, and the times of caching.
     cache: Vec<ArpCacheEntry>,
-
-    /// The amount of time after which an ARP cache entry should be refreshed.
-    refresh: Duration,
 }
 
 impl ArpCache {
     /// Construct a new ARP cache.
     /// 
     /// # Parameters
-    /// - `refresh` (`Duration`): the amount of time after which ARP cache
-    /// entries should be refreshed
+    /// None.
     /// 
     /// # Returns
     /// A new, empty `ArpCache`.
-    pub fn new(refresh: Duration) -> Self {
+    pub fn new() -> Self {
         Self {
             cache: Vec::new(),
-            refresh,
         }
     }
 
@@ -65,26 +60,6 @@ impl ArpCache {
     /// None.
     pub fn set(&mut self, cache: Vec<ArpCacheEntry>) {
         self.cache = cache;
-    }
-
-    /// Get a list of stale addresses in the ARP cache.
-    /// 
-    /// # Parameters
-    /// None.
-    /// 
-    /// # Returns
-    /// A `Vec<Ipv4Addr>` with a list of stale IPv4 addresses to check.
-    pub fn get_stale_ips(&mut self) -> Vec<Ipv4Addr> {
-        let mut stale_ips = Vec::new();
-
-        for entry in &self.cache {
-            // Check if the entry needs to be refreshed
-            if entry.check(self.refresh) {
-                stale_ips.push(entry.ipv4);
-            }
-        }
-
-        stale_ips
     }
 }
 
