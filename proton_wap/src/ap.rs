@@ -49,7 +49,7 @@ impl AccessPoint {
     /// # Returns
     /// An `Option<IPv4Packet>` with a translated source address and port number, if
     /// translation was successful.
-    pub fn translate_outgoing_tcp_segment(&mut self, packet: Ipv4Packet) -> Option<Ipv4Packet> {
+    pub fn translate_outgoing_ipv4_packet(&mut self, packet: Ipv4Packet) -> Option<Ipv4Packet> {
         // Construct a mutable IPv4 packet
         let mut ip_packet = MutableIpv4Packet::owned(packet.packet().to_vec())?;
         
@@ -90,6 +90,49 @@ impl AccessPoint {
 
         // Translate the port number
         tcp_segment.set_source(new_port);
+
+        Some (ip_packet.consume_to_immutable())
+    }
+
+    /// Translate an incoming IPv4 packet.
+    /// 
+    /// # Parameters
+    /// - `packet` (`Ipv4Packet`): the IPv4 packet to translate
+    /// 
+    /// # Returns
+    /// An `Option<IPv4Packet>` with a translated destination address and port number, if
+    /// translation was successful.
+    pub fn translate_incoming_ipv4_packet(&mut self, packet: Ipv4Packet) -> Option<Ipv4Packet> {
+        // Construct a mutable IPv4 packet
+        let mut ip_packet = MutableIpv4Packet::owned(packet.packet().to_vec())?;
+        
+        // Get the destination IPv4 address
+        let destination_ipv4: Ipv4Addr = ip_packet.get_destination();
+
+        // Construct an immutable TCP segment
+        let tcp_segment = TcpPacket::owned(ip_packet.payload().to_vec())?;
+
+        // Get the destination TCP port
+        let destination_port: u16 = tcp_segment.get_destination();
+
+        // Construct the destination socket
+        let destination_socket = SocketAddrV4::new(destination_ipv4, destination_port);
+        
+        // Check if the IPv4 address is in the NAT table
+        let translated_destination_socket = self.nat.translate_destination(destination_socket)?;
+
+        // Extract the IPv4 address and port number from the socket
+        let new_ipv4 = translated_destination_socket.ip();
+        let new_port = translated_destination_socket.port();
+
+        // Translate the IPv4 address
+        ip_packet.set_destination(*new_ipv4);
+
+        // Construct a mutable TCP segment from the IPv4 payload
+        let mut tcp_segment = MutableTcpPacket::new(ip_packet.payload_mut())?;
+
+        // Translate the port number
+        tcp_segment.set_destination(new_port);
 
         Some (ip_packet.consume_to_immutable())
     }
