@@ -70,12 +70,7 @@ impl AccessPoint {
             i
         } else {
             // Try to add the address to the NAT table
-            if let Some (i) = self.nat.add(source_socket) {
-                i
-            } else {
-                // No more addresses
-                return None;
-            }
+            self.nat.add(source_socket)?
         };
 
         // Extract the IPv4 address and port number from the socket

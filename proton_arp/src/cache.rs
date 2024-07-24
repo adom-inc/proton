@@ -22,6 +22,7 @@ pub struct ArpCache {
 }
 
 impl ArpCache {
+    #[allow(clippy::new_without_default)]
     /// Construct a new ARP cache.
     /// 
     /// # Parameters

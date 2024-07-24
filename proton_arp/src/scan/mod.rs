@@ -60,7 +60,7 @@ pub async fn scan(ips: Vec<Ipv4Addr>) -> ScanResult {
     let mut reply_rx = tx_task.await?;
 
     // Await the listener
-    let _ = rx_task.await?;
+    rx_task.await?;
 
     // Construct a list of entries
     let mut entries = Vec::new();
