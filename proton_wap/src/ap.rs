@@ -35,17 +35,7 @@ use pnet::{
 
 use tokio::task;
 
-use proton_mac::MacAddrPolicy;
-
 use proton_nat::NatTable;
-
-use proton_nif::{
-    ifnames::{
-        DEFAULT_WIRED_INTERFACE,
-        DEFAULT_WIRELESS_INTERFACE,
-    },
-    NetworkInterface,
-};
 
 use crate::AccessPointResult;
 
@@ -59,9 +49,6 @@ pub struct AccessPoint {
 
     /// CIDR network range.
     range: Ipv4Cidr,
-
-    /// MAC address management policy.
-    mac_policy: MacAddrPolicy,
 }
 
 impl AccessPoint {
@@ -72,20 +59,16 @@ impl AccessPoint {
     /// to this access point
     /// - `range` (`Ipv4Cidr`): the internal network range associated to
     /// this access point
-    /// - `mac_policy` (`MacAddrPolicy`): the MAC address policy of this
-    /// access point
     /// 
     /// # Returns
     /// A new `AccessPoint`.
     pub fn new(
         external_ipv4: Ipv4Addr,
         range: Ipv4Cidr,
-        mac_policy: MacAddrPolicy,
     ) -> Self {
         Self {
             nat: NatTable::new(vec![external_ipv4]),
             range,
-            mac_policy,
         }
     }
 
@@ -106,15 +89,10 @@ impl AccessPoint {
         // Get network range
         let range = self.range;
 
-        // Get MAC policy
-        let mac_policy = self.mac_policy.clone();
-
-        let layer_2_task = task::spawn(Self::run_layer_2(mac_policy));
-
         let layer_4_task = task::spawn(Self::run_layer_4(nat, range));
 
-        match tokio::join!(layer_2_task, layer_4_task) {
-            (Ok (_), Ok (_)) => Ok (()),
+        match tokio::join!(layer_4_task) {
+            (Ok (_),) => Ok (()),
             _ => todo!(),
         }
     }
@@ -168,68 +146,6 @@ impl AccessPoint {
                 }
             }
         }
-    }
-
-    /// Continuously route frames on the Data Link Layer (OSI Layer 2).
-    /// 
-    /// # Parameters
-    /// - `mac_policy` (`MacAddrPolicy`): the MAC address management policy
-    /// 
-    /// # Returns
-    /// An `AccessPointResult<()>` indicating an error, if one occurred.
-    /// 
-    /// This function does not return during nominal operation.
-    async fn run_layer_2(mac_policy: MacAddrPolicy) -> AccessPointResult<()> {
-        // Construct the wired network interface
-        let wired_if = NetworkInterface::new(DEFAULT_WIRED_INTERFACE)
-            .ok_or(io::Error::new(io::ErrorKind::Other, "could not find wired interface"))?;
-
-        // Construct the wireless network interface
-        let wireless_if = NetworkInterface::new(DEFAULT_WIRELESS_INTERFACE)
-            .ok_or(io::Error::new(io::ErrorKind::Other, "could not find wireless interface"))?;
-
-        // Route outgoing ETH frames
-        let outgoing_task = task::spawn(Self::route_outgoing_frames(wired_if.clone(), wireless_if.clone(), mac_policy));
-
-        // Route incoming ETH frames
-        let incoming_task = task::spawn(Self::route_incoming_frames(wired_if, wireless_if));
-
-        match tokio::join!(outgoing_task, incoming_task) {
-            (Ok (_), Ok (_)) => Ok (()),
-            _ => todo!(),
-        }
-    }
-
-    /// Route incoming Ethernet frames.
-    /// 
-    /// # Parameters
-    /// - `wired_if` (`NetworkInterface`): the wired network interface
-    /// - `wireless_if` (`NetworkInterface`): the wireless network interface
-    /// 
-    /// # Returns
-    /// TODO
-    async fn route_incoming_frames(
-        _wired_if: NetworkInterface,
-        _wireless_if: NetworkInterface,
-    ) {
-        todo!()
-    }
-
-    /// Route outgoing Ethernet frames.
-    /// 
-    /// # Parameters
-    /// - `wired_if` (`NetworkInterface`): the wired network interface
-    /// - `wireless_if` (`NetworkInterface`): the wireless network interface
-    /// - `mac_policy` (`MacAddrPolicy`): the MAC address management policy
-    /// 
-    /// # Returns
-    /// TODO
-    async fn route_outgoing_frames(
-        _wired_if: NetworkInterface,
-        _wireless_if: NetworkInterface,
-        _mac_policy: MacAddrPolicy,
-    ) {
-        todo!()
     }
 
     /// Translate an IPv4 packet.
