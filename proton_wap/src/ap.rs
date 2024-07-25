@@ -26,8 +26,7 @@ use pnet::{
         MutablePacket,
     },
     transport::{
-        TransportChannelType::Layer4,
-        TransportProtocol::Ipv4,
+        TransportChannelType::Layer3,
         transport_channel,
         ipv4_packet_iter,
     },
@@ -112,7 +111,7 @@ impl AccessPoint {
         range: Ipv4Cidr,
     ) -> AccessPointResult<()> {
         // Create an IPv4 protocol
-        let protocol = Layer4 (Ipv4 (IpNextHeaderProtocols::Ipv4));
+        let protocol = Layer3 (IpNextHeaderProtocols::Tcp);
 
         // Create a new transport protocol 
         let (mut tx, mut rx) = match transport_channel(TRANSPORT_CHANNEL_BUFFER_SIZE, protocol) {
