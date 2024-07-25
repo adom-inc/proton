@@ -7,6 +7,7 @@ use crate::MacAddrPolicyError;
 /// Result type for MAC address policy actions.
 pub type PolicyResult = Result<(), MacAddrPolicyError>;
 
+#[derive(Clone)]
 /// A MAC address policy.
 /// 
 /// This defines the policy by which MAC addresses (hardware addresses
@@ -112,6 +113,12 @@ impl MacAddrPolicy {
             // A blacklist denies only some MAC addresses
             Self::Blacklist (bl) => !bl.contains(&address),
         }
+    }
+}
+
+impl Default for MacAddrPolicy {
+    fn default() -> Self {
+        Self::public()
     }
 }
 

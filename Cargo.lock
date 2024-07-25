@@ -353,6 +353,8 @@ dependencies = [
 name = "proton"
 version = "0.1.0"
 dependencies = [
+ "cidr",
+ "pnet",
  "proton_arp",
  "proton_dev",
  "proton_mac",
@@ -412,7 +414,10 @@ version = "0.1.0"
 dependencies = [
  "cidr",
  "pnet",
+ "proton_mac",
  "proton_nat",
+ "proton_nif",
+ "tokio",
 ]
 
 [[package]]

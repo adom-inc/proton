@@ -19,6 +19,7 @@ const MINIMUM_NAT_PORT: Layer4Port = 50_000;
 /// Maximum Layer 4 port permitted (inclusive).
 const MAXIMUM_NAT_PORT: Layer4Port = u16::MAX;
 
+#[derive(Clone)]
 /// A Network Address Translation table.
 /// 
 /// This table provides a bijective mapping (with the help of the external crate `bimap`) to

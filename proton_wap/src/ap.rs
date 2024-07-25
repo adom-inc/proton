@@ -3,6 +3,7 @@
 use std::{
     io,
     net::{
+        IpAddr,
         Ipv4Addr,
         SocketAddrV4,
     },
@@ -32,7 +33,19 @@ use pnet::{
     },
 };
 
+use tokio::task;
+
+use proton_mac::MacAddrPolicy;
+
 use proton_nat::NatTable;
+
+use proton_nif::{
+    ifnames::{
+        DEFAULT_WIRED_INTERFACE,
+        DEFAULT_WIRELESS_INTERFACE,
+    },
+    NetworkInterface,
+};
 
 use crate::AccessPointResult;
 
@@ -46,6 +59,9 @@ pub struct AccessPoint {
 
     /// CIDR network range.
     range: Ipv4Cidr,
+
+    /// MAC address management policy.
+    mac_policy: MacAddrPolicy,
 }
 
 impl AccessPoint {
@@ -56,26 +72,67 @@ impl AccessPoint {
     /// to this access point
     /// - `range` (`Ipv4Cidr`): the internal network range associated to
     /// this access point
+    /// - `mac_policy` (`MacAddrPolicy`): the MAC address policy of this
+    /// access point
     /// 
     /// # Returns
     /// A new `AccessPoint`.
-    pub fn new(external_ipv4: Ipv4Addr, range: Ipv4Cidr) -> Self {
+    pub fn new(
+        external_ipv4: Ipv4Addr,
+        range: Ipv4Cidr,
+        mac_policy: MacAddrPolicy,
+    ) -> Self {
         Self {
             nat: NatTable::new(vec![external_ipv4]),
             range,
+            mac_policy,
+        }
+    }
+
+    /// Continuously route packets, monitoring both the Data Link Layer and
+    /// the Transport Layer to ensure both proper NAT and MAC policy enforcement.
+    /// 
+    /// # Parameters
+    /// None.
+    /// 
+    /// # Returns
+    /// An `AccessPointResult<()>` indicating an error, if one occurred.
+    /// 
+    /// This function does not return during nominal operation.
+    pub async fn run(&mut self) -> AccessPointResult<()> {
+        // Construct new NAT
+        let nat = self.nat.clone();
+
+        // Get network range
+        let range = self.range;
+
+        // Get MAC policy
+        let mac_policy = self.mac_policy.clone();
+
+        let layer_2_task = task::spawn(Self::run_layer_2(mac_policy));
+
+        let layer_4_task = task::spawn(Self::run_layer_4(nat, range));
+
+        match tokio::join!(layer_2_task, layer_4_task) {
+            (Ok (_), Ok (_)) => Ok (()),
+            _ => todo!(),
         }
     }
 
     /// Continuously route packets on the Transport Layer (OSI Layer 4).
     /// 
     /// # Parameters
-    /// None.
+    /// - `nat` (`NatTable`): the reference NAT table
+    /// - `range` (`Ipv4Cidr`): the network range
     /// 
     /// # Returns
-    /// An `AccessPointResult` indicating an error, if one occurred.
+    /// An `AccessPointResult<()>` indicating an error, if one occurred.
     /// 
-    /// This function does not return if there are no errors.
-    pub fn run(&mut self) -> AccessPointResult {
+    /// This function does not return during nominal operation.
+    async fn run_layer_4(
+        mut nat: NatTable,
+        range: Ipv4Cidr,
+    ) -> AccessPointResult<()> {
         // Create an IPv4 protocol
         let protocol = Layer4 (Ipv4 (IpNextHeaderProtocols::Ipv4));
 
@@ -85,37 +142,22 @@ impl AccessPoint {
             Err (_) => return Err (io::Error::new(io::ErrorKind::Other, "could not open transport channel")),
         };
 
-        // We treat received packets as if they were IPv4 packets
+        // We treat received packets as if they are IPv4 packets
         let mut iter = ipv4_packet_iter(&mut rx);
 
         // Continuously iterate through the packets on the receiving line
         loop {
             match iter.next() {
                 Ok ((packet, addr)) => {
-                    // Allocate enough space for a new packet
-                    let mut vec: Vec<u8> = vec![0; packet.packet().len()];
-                    let mut new_packet = MutableIpv4Packet::new(&mut vec[..]).unwrap();
-    
-                    // Create a clone of the original packet
-                    new_packet.clone_from(&packet);
-
-                    // Get source IPv4
-                    let source_ipv4: Ipv4Addr = new_packet.get_source();
-
-                    // Construct immutable packet
-                    let ipv4_packet = new_packet.to_immutable();
-
-                    // Detect NAT type and translate packet
-                    let translated_packet = if self.range.contains(&source_ipv4) {
-                        // Source NAT
-                        self.translate_outgoing_ipv4_packet(ipv4_packet)
-                    } else {
-                        // Destination NAT
-                        self.translate_incoming_ipv4_packet(ipv4_packet)
-                    }.ok_or(io::Error::new(io::ErrorKind::Other, "could not perform NAT"))?;
+                    let (translated_packet, translated_addr) = Self::translate_packet(
+                        &mut nat,
+                        range,
+                        packet,
+                        addr,
+                    )?;
     
                     // Send the translated packet
-                    if tx.send_to(translated_packet, addr).is_err() {
+                    if tx.send_to(translated_packet, translated_addr).is_err() {
                         println!("Failed to send packet to address {}", addr);
                     }
                 }
@@ -128,15 +170,135 @@ impl AccessPoint {
         }
     }
 
+    /// Continuously route frames on the Data Link Layer (OSI Layer 2).
+    /// 
+    /// # Parameters
+    /// - `mac_policy` (`MacAddrPolicy`): the MAC address management policy
+    /// 
+    /// # Returns
+    /// An `AccessPointResult<()>` indicating an error, if one occurred.
+    /// 
+    /// This function does not return during nominal operation.
+    async fn run_layer_2(mac_policy: MacAddrPolicy) -> AccessPointResult<()> {
+        // Construct the wired network interface
+        let wired_if = NetworkInterface::new(DEFAULT_WIRED_INTERFACE)
+            .ok_or(io::Error::new(io::ErrorKind::Other, "could not find wired interface"))?;
+
+        // Construct the wireless network interface
+        let wireless_if = NetworkInterface::new(DEFAULT_WIRELESS_INTERFACE)
+            .ok_or(io::Error::new(io::ErrorKind::Other, "could not find wireless interface"))?;
+
+        // Route outgoing ETH frames
+        let outgoing_task = task::spawn(Self::route_outgoing_frames(wired_if.clone(), wireless_if.clone(), mac_policy));
+
+        // Route incoming ETH frames
+        let incoming_task = task::spawn(Self::route_incoming_frames(wired_if, wireless_if));
+
+        match tokio::join!(outgoing_task, incoming_task) {
+            (Ok (_), Ok (_)) => Ok (()),
+            _ => todo!(),
+        }
+    }
+
+    /// Route incoming Ethernet frames.
+    /// 
+    /// # Parameters
+    /// - `wired_if` (`NetworkInterface`): the wired network interface
+    /// - `wireless_if` (`NetworkInterface`): the wireless network interface
+    /// 
+    /// # Returns
+    /// TODO
+    async fn route_incoming_frames(
+        _wired_if: NetworkInterface,
+        _wireless_if: NetworkInterface,
+    ) {
+        todo!()
+    }
+
+    /// Route outgoing Ethernet frames.
+    /// 
+    /// # Parameters
+    /// - `wired_if` (`NetworkInterface`): the wired network interface
+    /// - `wireless_if` (`NetworkInterface`): the wireless network interface
+    /// - `mac_policy` (`MacAddrPolicy`): the MAC address management policy
+    /// 
+    /// # Returns
+    /// TODO
+    async fn route_outgoing_frames(
+        _wired_if: NetworkInterface,
+        _wireless_if: NetworkInterface,
+        _mac_policy: MacAddrPolicy,
+    ) {
+        todo!()
+    }
+
+    /// Translate an IPv4 packet.
+    /// 
+    /// # Parameters
+    /// - `nat` (`&mut NatTable`): the reference NAT table
+    /// - `range` (`Ipv4Cidr`): the network range
+    /// - `packet` (`Ipv4Packet`): an IPv4 packet to be translated
+    /// - `addr` (`IpAddr`): the destination IP address of the packet,
+    /// which will change in the case of Destination NAT (DNAT).
+    fn translate_packet<'a>(
+        nat: &'a mut NatTable,
+        range: Ipv4Cidr,
+        packet: Ipv4Packet<'a>,
+        addr: IpAddr,
+    ) -> AccessPointResult<(Ipv4Packet<'a>, IpAddr)> {
+        // Allocate enough space for a new packet
+        let mut vec: Vec<u8> = vec![0; packet.packet().len()];
+        let mut new_packet = MutableIpv4Packet::new(&mut vec[..]).unwrap();
+
+        // Create a clone of the original packet
+        new_packet.clone_from(&packet);
+
+        // Get source IPv4
+        let source_ipv4: Ipv4Addr = new_packet.get_source();
+
+        // Construct immutable packet
+        let ipv4_packet = new_packet.to_immutable();
+
+        // Set translated address
+        let mut translated_addr = addr;
+
+        // Detect NAT type and translate packet
+        let output_packet = if range.contains(&source_ipv4) {
+            // Source NAT
+            Self::translate_outgoing_ipv4_packet(nat, ipv4_packet)
+                .ok_or(io::Error::new(io::ErrorKind::Other, "could not perform source NAT"))?
+        } else {
+            // Destination NAT
+            let (packet, new_addr) = Self::translate_incoming_ipv4_packet(nat, ipv4_packet)
+                .ok_or(io::Error::new(io::ErrorKind::Other, "could not perform destination NAT"))?;
+            
+            // Set new destination address
+            translated_addr = IpAddr::V4 (*new_addr.ip());
+
+            packet
+        };
+
+        // Clone the translated packet
+        let vec: Vec<u8> = vec![0; packet.packet().len()];
+        let mut translated_packet = MutableIpv4Packet::owned(vec).unwrap();
+        translated_packet.clone_from(&output_packet);
+
+        Ok ((translated_packet.consume_to_immutable(), translated_addr))
+    }
+
     /// Translate an outgoing IPv4 packet.
     /// 
     /// # Parameters
+    /// - `nat` (`&mut NatTable`): the reference NAT table
     /// - `packet` (`Ipv4Packet`): the IPv4 packet to translate
     /// 
     /// # Returns
     /// An `Option<IPv4Packet>` with a translated source address and port number, if
     /// translation was successful.
-    fn translate_outgoing_ipv4_packet(&mut self, packet: Ipv4Packet) -> Option<Ipv4Packet> {
+    fn translate_outgoing_ipv4_packet<'a>(
+        nat: &'a mut NatTable,
+        packet: Ipv4Packet<'a>
+    ) -> Option<Ipv4Packet<'a>> {
         // Construct a mutable IPv4 packet
         let mut ip_packet = MutableIpv4Packet::owned(packet.packet().to_vec())?;
         
@@ -153,11 +315,11 @@ impl AccessPoint {
         let source_socket = SocketAddrV4::new(source_ipv4, source_port);
         
         // Check if the IPv4 address is in the NAT table
-        let translated_source_socket = if let Some (i) = self.nat.translate_source(source_socket) {
+        let translated_source_socket = if let Some (i) = nat.translate_source(source_socket) {
             i
         } else {
             // Try to add the address to the NAT table
-            self.nat.add(source_socket)?
+            nat.add(source_socket)?
         };
 
         // Extract the IPv4 address and port number from the socket
@@ -179,12 +341,16 @@ impl AccessPoint {
     /// Translate an incoming IPv4 packet.
     /// 
     /// # Parameters
+    /// - `nat` (`&mut NatTable`): the reference NAT table
     /// - `packet` (`Ipv4Packet`): the IPv4 packet to translate
     /// 
     /// # Returns
-    /// An `Option<IPv4Packet>` with a translated destination address and port number, if
-    /// translation was successful.
-    fn translate_incoming_ipv4_packet(&mut self, packet: Ipv4Packet) -> Option<Ipv4Packet> {
+    /// An `Option<(IPv4Packet, SocketAddrV4)>` with an IPv4 packet with translated destination
+    /// address and port number, and the new destination, if translation was successful.
+    fn translate_incoming_ipv4_packet<'a>(
+        nat: &'a mut NatTable,
+        packet: Ipv4Packet<'a>
+    ) -> Option<(Ipv4Packet<'a>, SocketAddrV4)> {
         // Construct a mutable IPv4 packet
         let mut ip_packet = MutableIpv4Packet::owned(packet.packet().to_vec())?;
         
@@ -201,7 +367,7 @@ impl AccessPoint {
         let destination_socket = SocketAddrV4::new(destination_ipv4, destination_port);
         
         // Check if the IPv4 address is in the NAT table
-        let translated_destination_socket = self.nat.translate_destination(destination_socket)?;
+        let translated_destination_socket = nat.translate_destination(destination_socket)?;
 
         // Extract the IPv4 address and port number from the socket
         let new_ipv4 = translated_destination_socket.ip();
@@ -216,6 +382,6 @@ impl AccessPoint {
         // Translate the port number
         tcp_segment.set_destination(new_port);
 
-        Some (ip_packet.consume_to_immutable())
+        Some ((ip_packet.consume_to_immutable(), translated_destination_socket))
     }
 }
