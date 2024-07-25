@@ -123,10 +123,15 @@ impl AccessPoint {
         // We treat received packets as if they are IPv4 packets
         let mut iter = ipv4_packet_iter(&mut rx);
 
+        println!("Beginning listener...");
+
         // Continuously iterate through the packets on the receiving line
         loop {
+            println!("    Waiting for packet...");
             match iter.next() {
                 Ok ((packet, addr)) => {
+                    println!("        Received packet: {:#?}", packet);
+
                     let (translated_packet, translated_addr) = Self::translate_packet(
                         &mut nat,
                         range,
@@ -136,15 +141,16 @@ impl AccessPoint {
     
                     // Send the translated packet
                     if tx.send_to(translated_packet, translated_addr).is_err() {
-                        println!("Failed to send packet to address {}", addr);
+                        println!("        Failed to send packet to address {}", addr);
                     }
                 }
                 Err (e) => {
                     // If an error occurs, we can handle it here
-                    println!("Failed to route packet: {:#?}", e);
+                    println!("        Failed to route packet: {:#?}", e);
                     continue;
                 }
             }
+            println!();
         }
     }
 

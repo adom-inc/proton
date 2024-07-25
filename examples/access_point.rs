@@ -15,7 +15,6 @@ async fn main() {
             Ipv4Addr::new(10, 0, 0, 0),     // Network address
             24,                             // Network length
         ).unwrap(),
-        Default::default()              // MAC address management policy (default: public)
     );
 
     let result = ap.run().await;
