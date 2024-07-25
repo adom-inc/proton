@@ -91,7 +91,7 @@ impl AccessPoint {
         let layer_4_task = task::spawn(Self::run_layer_4(nat, range));
 
         match tokio::join!(layer_4_task) {
-            (Ok (_),) => Ok (()),
+            (Ok (Ok (_)),) => Ok (()),
             _ => todo!(),
         }
     }
@@ -110,7 +110,7 @@ impl AccessPoint {
         mut nat: NatTable,
         range: Ipv4Cidr,
     ) -> AccessPointResult<()> {
-        // Create an IPv4 protocol
+        // Create a network layer protocol with TCP packets
         let protocol = Layer3 (IpNextHeaderProtocols::Tcp);
 
         // Create a new transport protocol 
@@ -137,6 +137,8 @@ impl AccessPoint {
                         packet,
                         addr,
                     )?;
+
+                    println!("        Translated packet: {:#?}", translated_packet);
     
                     // Send the translated packet
                     if tx.send_to(translated_packet, translated_addr).is_err() {
