@@ -62,8 +62,6 @@ pub struct AccessPoint {
 
     /// MAC address management policy.
     mac_policy: MacAddrPolicy,
-
-    /// Device management 
 }
 
 impl AccessPoint {
