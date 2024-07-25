@@ -361,6 +361,7 @@ dependencies = [
  "proton_nat",
  "proton_nif",
  "proton_wap",
+ "tokio",
 ]
 
 [[package]]

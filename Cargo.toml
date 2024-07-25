@@ -20,6 +20,10 @@ cidr = "0.2.3"
 [dependencies.pnet]
 version = "0.35.0"
 
+[dependencies.tokio]
+version = "1"
+features = ["full"]
+
 [dependencies.proton_arp]
 path = "proton_arp"
 
