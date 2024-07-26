@@ -1,0 +1,10 @@
+[package]
+name = "proton_err"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "proton_err"
+path = "src/lib.rs"
+
+[dependencies]

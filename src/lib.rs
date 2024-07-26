@@ -3,4 +3,12 @@
 #![deny(warnings)]
 #![deny(missing_docs)]
 
-pub use proton_wap::AccessPoint;
+/// Proton error handling functionality.
+pub mod error {
+    pub use proton_err::ProtonError;
+}
+
+/// Proton access point utilities.
+pub mod ap {
+    pub use proton_wap::AccessPoint;
+}

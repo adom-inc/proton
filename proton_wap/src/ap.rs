@@ -2,6 +2,8 @@
 
 use cidr::Ipv4Cidr;
 
+use proton_dev::DeviceManager;
+
 use crate::AccessPointResult;
 
 #[allow(dead_code)]
@@ -9,6 +11,9 @@ use crate::AccessPointResult;
 pub struct AccessPoint {
     /// CIDR network range.
     range: Ipv4Cidr,
+
+    /// Device manager.
+    manager: DeviceManager,
 }
 
 impl AccessPoint {
@@ -25,6 +30,7 @@ impl AccessPoint {
     ) -> Self {
         Self {
             range,
+            manager: DeviceManager::new(range).expect("could not open Netlink socket"), // TODO
         }
     }
 

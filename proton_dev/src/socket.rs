@@ -32,6 +32,15 @@ pub trait NetworkSocket {
     /// # Returns
     /// `NetlinkResult<Vec<Station>>` containing a list of network stations.
     fn get_all_stations(&mut self, nlif_index: &[u8]) -> NetlinkResult<Vec<Station>>;
+
+    /// Deauthenticate a device from this AP by MAC address.
+    /// 
+    /// # Parameters
+    /// TODO
+    /// 
+    /// # Returns
+    /// TODO
+    fn deauthenticate_by_mac(&mut self) -> ();
 }
 
 impl NetworkSocket for Socket {
@@ -42,7 +51,7 @@ impl NetworkSocket for Socket {
         // Get the Netlink socket
         let nl80211sock = &mut self.sock;
 
-        // What does this do?
+        // Set Generic Netlink attributes
         let mut attrs: Vec<Nlattr<Nl80211Attr, Vec<u8>>> = vec![];
         let new_attr = Nlattr::new(
             None,
@@ -98,5 +107,11 @@ impl NetworkSocket for Socket {
         }
 
         Ok(results)
+    }
+
+    fn deauthenticate_by_mac(
+        &mut self,
+    ) -> () {
+        todo!()
     }
 }

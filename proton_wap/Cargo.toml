@@ -17,6 +17,12 @@ version = "0.35.0"
 version = "1"
 features = ["full"]
 
+[dependencies.proton_dev]
+path = "../proton_dev"
+
+[dependencies.proton_err]
+path = "../proton_err"
+
 [dependencies.proton_mac]
 path = "../proton_mac"
 
