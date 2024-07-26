@@ -10,7 +10,6 @@ use proton::AccessPoint;
 #[tokio::main]
 async fn main() {
     let mut ap = AccessPoint::new(
-        Ipv4Addr::new(10, 0, 0, 1),     // External IPv4 address
         Ipv4Cidr::new(                  // Internal network range
             Ipv4Addr::new(10, 0, 0, 0),     // Network address
             24,                             // Network length
