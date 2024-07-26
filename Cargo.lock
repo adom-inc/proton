@@ -388,6 +388,9 @@ dependencies = [
 [[package]]
 name = "proton_err"
 version = "0.1.0"
+dependencies = [
+ "proton_mac",
+]
 
 [[package]]
 name = "proton_mac"

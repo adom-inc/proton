@@ -9,6 +9,8 @@ use proton_dev::{
 
 use proton_err::ProtonResult;
 
+use proton_mac::MacAddr;
+
 /// A wireless access point.
 pub struct AccessPoint {
     #[allow(dead_code)]
@@ -52,6 +54,18 @@ impl AccessPoint {
     pub async fn scan(&mut self) -> ProtonResult<Vec<Device>> {
         Ok (self.manager.scan().await?)
     }
+
+    /// Deauthenticate a device by its MAC address.
+    /// 
+    /// # Parameters
+    /// - `mac` (`MacAddr`): the MAC address of the device to be
+    /// deauthenticated
+    ///
+    /// # Returns
+    /// A `ProtonResult<()>` indicating the status of the response.
+    pub fn deauth(&mut self, mac: MacAddr) -> ProtonResult<()> {
+        self.manager.deauthenticate(mac)
+    } 
 
     /// Continuously route packets, monitoring both the Data Link Layer and
     /// the Transport Layer to ensure both proper NAT and MAC policy enforcement.

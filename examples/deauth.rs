@@ -1,4 +1,4 @@
-//! Example code to list wireless devices connected to an access point.
+//! Example code to deauthenticate a wireless device.
 
 use std::net::Ipv4Addr;
 
@@ -26,6 +26,12 @@ async fn main() -> ProtonResult<()> {
     let devices: Vec<Device> = ap.scan().await?;
 
     println!("Found: {:#?}", devices);
+
+    let deauth_mac = devices[0].mac;
+
+    println!("Deauthenticating {}", deauth_mac);
+
+    ap.deauth(deauth_mac)?;
 
     Ok (())
 }

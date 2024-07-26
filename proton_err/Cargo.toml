@@ -7,4 +7,5 @@ edition = "2021"
 name = "proton_err"
 path = "src/lib.rs"
 
-[dependencies]
+[dependencies.proton_mac]
+path = "../proton_mac"
