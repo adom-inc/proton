@@ -8,6 +8,11 @@ pub mod ap {
     pub use proton_wap::AccessPoint;
 }
 
+/// CIDR network range structure.
+pub mod cidr {
+    pub use cidr::Ipv4Cidr;
+}
+
 /// Device management functionality.
 pub mod device {
     pub use proton_dev::Device;
