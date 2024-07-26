@@ -4,7 +4,6 @@ members = [
     "proton_arp",
     "proton_dev",
     "proton_mac",
-    "proton_nat",
     "proton_nif",
     "proton_wap",
 ]
@@ -32,9 +31,6 @@ path = "proton_dev"
 
 [dependencies.proton_mac]
 path = "proton_mac"
-
-[dependencies.proton_nat]
-path = "proton_nat"
 
 [dependencies.proton_nif]
 path = "proton_nif"

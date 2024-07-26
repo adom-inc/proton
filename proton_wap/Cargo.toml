@@ -20,8 +20,5 @@ features = ["full"]
 [dependencies.proton_mac]
 path = "../proton_mac"
 
-[dependencies.proton_nat]
-path = "../proton_nat"
-
 [dependencies.proton_nif]
 path = "../proton_nif"

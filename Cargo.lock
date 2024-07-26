@@ -48,12 +48,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bimap"
-version = "0.6.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "230c5f1ca6a325a32553f8640d31ac9b49f2411e901e427570154868b46da4f7"
-
-[[package]]
 name = "bitflags"
 version = "2.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -358,7 +352,6 @@ dependencies = [
  "proton_arp",
  "proton_dev",
  "proton_mac",
- "proton_nat",
  "proton_nif",
  "proton_wap",
  "tokio",
@@ -395,13 +388,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "proton_nat"
-version = "0.1.0"
-dependencies = [
- "bimap",
-]
-
-[[package]]
 name = "proton_nif"
 version = "0.1.0"
 dependencies = [
@@ -416,7 +402,6 @@ dependencies = [
  "cidr",
  "pnet",
  "proton_mac",
- "proton_nat",
  "proton_nif",
  "tokio",
 ]
