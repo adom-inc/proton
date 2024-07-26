@@ -8,7 +8,6 @@ use proton::{
     ap::AccessPoint,
     device::Device,
     error::ProtonResult,
-    ifnames::DEFAULT_WIRELESS_INTERFACE,
 };
 
 #[tokio::main]
@@ -18,13 +17,14 @@ async fn main() -> ProtonResult<()> {
             Ipv4Addr::new(192, 168, 0, 0),  // Network address
             24,                             // Network length
         ).unwrap(),
+        "wlp4s0",
     )?;
 
-    println!("Scanning {}...", DEFAULT_WIRELESS_INTERFACE);
+    println!("Scanning network interface: {}...", "wlp4s0");
 
-    let devices: Vec<Device> = ap.scan(DEFAULT_WIRELESS_INTERFACE).await?;
+    let devices: Vec<Device> = ap.scan().await?;
 
-    println!("{:#?}", devices);
+    println!("Found: {:#?}", devices);
 
     Ok (())
 }

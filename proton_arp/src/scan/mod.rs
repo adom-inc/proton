@@ -15,10 +15,7 @@ use tokio::{
 
 use proton_err::ProtonResult;
 
-use proton_nif::{
-    ifnames::DEFAULT_WIRELESS_INTERFACE,
-    NetworkInterface,
-};
+use proton_nif::NetworkInterface;
 
 use crate::ArpCacheEntry;
 
@@ -35,13 +32,14 @@ pub static ARP_LISTENER_DELAY: Duration = Duration::from_millis(2_500);
 /// 
 /// # Parameters
 /// - `ips` (`Vec<Ipv4Addr>`): the IPv4 addresses to scan
+/// - `ifname` (`&str`): the name of the wireless interface to scan
 /// 
 /// # Returns
 /// A `ProtonResult<Vec<ArpCacheEntry>>` containing the ARP responses
 /// received, if the scan was successful.
-pub async fn scan(ips: Vec<Ipv4Addr>) -> ProtonResult<Vec<ArpCacheEntry>> {
+pub async fn scan(ips: Vec<Ipv4Addr>, ifname: &str) -> ProtonResult<Vec<ArpCacheEntry>> {
     // Get the wireless network interface
-    let interface = NetworkInterface::new(DEFAULT_WIRELESS_INTERFACE)?;
+    let interface = NetworkInterface::new(ifname)?;
 
     // Create an asynchronous communication channel for received replies
     let (reply_tx, reply_rx) = mpsc::channel::<ArpCacheEntry>(ARP_CHANNEL_BUFFER_SIZE);

@@ -38,7 +38,6 @@ path = "proton_mac"
 
 [dependencies.proton_nif]
 path = "proton_nif"
-features = ["cndn"]
 
 [dependencies.proton_wap]
 path = "proton_wap"

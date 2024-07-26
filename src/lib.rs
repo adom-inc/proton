@@ -20,8 +20,3 @@ pub mod error {
         ProtonResult,
     };
 }
-
-/// Network interface names.
-pub mod ifnames {
-    pub use proton_nif::ifnames::*;
-}

@@ -22,6 +22,9 @@ pub struct ArpManager {
 
     /// A correspondence between IPv4 addresses and MAC addresses.
     cache: ArpCache,
+
+    /// The name of the network interface to be scanned.
+    ifname: String,
 }
 
 impl ArpManager {
@@ -29,13 +32,15 @@ impl ArpManager {
     /// 
     /// # Parameters
     /// - `range` (`Ipv4Cidr`): the CIDR range of the network
+    /// - `ifname` (`&str`): the name of the network interface
     /// 
     /// # Returns
     /// A new `ArpManager` with an empty cache.
-    pub fn new(range: Ipv4Cidr) -> Self {
+    pub fn new(range: Ipv4Cidr, ifname: &str) -> Self {
         Self {
             range,
             cache: ArpCache::new(),
+            ifname: ifname.to_string(),
         }
     }
 
@@ -60,7 +65,7 @@ impl ArpManager {
         }
 
         // Scan the network and update the cache
-        self.cache.set(scan(addresses).await?);
+        self.cache.set(scan(addresses, &self.ifname).await?);
 
         Ok (())
     }

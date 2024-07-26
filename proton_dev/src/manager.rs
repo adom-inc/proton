@@ -29,6 +29,9 @@ pub struct DeviceManager {
     /// Network interface socket.
     socket: Socket,
 
+    /// Wireless interface name.
+    wlifname: String,
+
     /// ARP cache manager.
     arp_manager: ArpManager,
 }
@@ -38,14 +41,17 @@ impl DeviceManager {
     /// 
     /// # Parameters
     /// - `range` (`Ipv4Cidr`): the CIDR range of the network
+    /// - `wlifname` (`&str`): the name of the wireless interface
+    /// over which to scan for connected devices
     /// 
     /// # Returns
     /// The result type `ProtonResult<DeviceManager>` containing the device
     /// manager, if its initialization was successful.
-    pub fn new(range: Ipv4Cidr) -> ProtonResult<Self> {
+    pub fn new(range: Ipv4Cidr, wlifname: &str) -> ProtonResult<Self> {
         Ok (Self {
             socket: Socket::connect()?,
-            arp_manager: ArpManager::new(range),
+            wlifname: wlifname.to_string(),
+            arp_manager: ArpManager::new(range, wlifname),
         })
     }
 
@@ -57,12 +63,12 @@ impl DeviceManager {
     /// # Returns
     /// The result type `ProtonResult<Vec<Device>>` containing a list of
     /// connected devices.
-    pub async fn scan(&mut self, ifname: &str) -> ProtonResult<Vec<Device>> {
+    pub async fn scan(&mut self) -> ProtonResult<Vec<Device>> {
         // Perform an ARP scan of the network to get IPs
         self.arp_manager.scan().await?;
 
         // Determine Wi-Fi device by name
-        let check_wifi_device = |iface: &Interface| parse_string(&iface.name.clone().unwrap_or_default()) == ifname;
+        let check_wifi_device = |iface: &Interface| parse_string(&iface.name.clone().unwrap_or_default()) == self.wlifname;
 
         // Get the Wi-Fi device
         let interface = self.socket.get_interfaces_info()?

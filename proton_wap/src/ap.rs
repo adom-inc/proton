@@ -9,9 +9,9 @@ use proton_dev::{
 
 use proton_err::ProtonResult;
 
-#[allow(dead_code)]
 /// A wireless access point.
 pub struct AccessPoint {
+    #[allow(dead_code)]
     /// CIDR network range.
     range: Ipv4Cidr,
 
@@ -25,30 +25,32 @@ impl AccessPoint {
     /// # Parameters
     /// - `range` (`Ipv4Cidr`): the internal network range associated to
     /// this access point
+    /// - `wlifname` (`&str`): the name of the wireless interface over which
+    /// this access point connects to remote devices
     /// 
     /// # Returns
     /// A `ProtonResult<AccessPoint>` containing a new `AccessPoint` if
     /// initialization was successful.
     pub fn new(
         range: Ipv4Cidr,
+        wlifname: &str,
     ) -> ProtonResult<Self> {
         Ok (Self {
             range,
-            manager: DeviceManager::new(range)?,
+            manager: DeviceManager::new(range, wlifname)?,
         })
     }
 
     /// Get a list of all connected devices.
     /// 
     /// # Parameters
-    /// - `ifname` (`&str`): the name of the wireless network interface to
-    /// scan
+    /// None.
     /// 
     /// # Returns
     /// A `ProtonResult<Vec<Device>>` wrappping the list of devices, if
     /// the network scan was successful.
-    pub async fn scan(&mut self, ifname: &str) -> ProtonResult<Vec<Device>> {
-        Ok (self.manager.scan(ifname).await?)
+    pub async fn scan(&mut self) -> ProtonResult<Vec<Device>> {
+        Ok (self.manager.scan().await?)
     }
 
     /// Continuously route packets, monitoring both the Data Link Layer and
@@ -62,6 +64,6 @@ impl AccessPoint {
     /// 
     /// This function does not return during nominal operation.
     pub async fn run(&mut self) -> ProtonResult<()> {
-        loop { }
+        todo!()
     }
 }
