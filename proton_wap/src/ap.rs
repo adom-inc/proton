@@ -4,7 +4,7 @@ use cidr::Ipv4Cidr;
 
 use proton_dev::DeviceManager;
 
-use crate::AccessPointResult;
+use proton_err::ProtonResult;
 
 #[allow(dead_code)]
 /// A wireless access point.
@@ -24,14 +24,15 @@ impl AccessPoint {
     /// this access point
     /// 
     /// # Returns
-    /// A new `AccessPoint`.
+    /// A `ProtonResult<AccessPoint>` containing a new `AccessPoint` if
+    /// initialization was successful.
     pub fn new(
         range: Ipv4Cidr,
-    ) -> Self {
-        Self {
+    ) -> ProtonResult<Self> {
+        Ok (Self {
             range,
-            manager: DeviceManager::new(range).expect("could not open Netlink socket"), // TODO
-        }
+            manager: DeviceManager::new(range)?,
+        })
     }
 
     /// Continuously route packets, monitoring both the Data Link Layer and
@@ -41,10 +42,10 @@ impl AccessPoint {
     /// None.
     /// 
     /// # Returns
-    /// An `AccessPointResult<()>` indicating an error, if one occurred.
+    /// A `ProtonResult<()>` indicating an error, if one occurred.
     /// 
     /// This function does not return during nominal operation.
-    pub async fn run(&mut self) -> AccessPointResult<()> {
+    pub async fn run(&mut self) -> ProtonResult<()> {
         loop { }
     }
 }

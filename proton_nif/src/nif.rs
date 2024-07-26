@@ -26,6 +26,11 @@ use pnet::{
 
 use tokio::sync::Mutex;
 
+use proton_err::{
+    ProtonError,
+    ProtonResult,
+};
+
 #[derive(Clone)]
 /// An OSI Layer 2 (Data Link Layer) network interface.
 pub struct NetworkInterface {
@@ -49,13 +54,14 @@ impl<'a> NetworkInterface {
     /// - `iface_name` (`&str`): the name of the network interface
     ///
     /// # Returns
-    /// `Option<Self>`, containing the network interface, if it was found.
-    pub fn new(iface_name: &str) -> Option<Self> {
+    /// `ProtonResult<Self>`, containing the network interface, if it was found.
+    pub fn new(iface_name: &str) -> ProtonResult<Self> {
         // Get network interface by name
         let all_interfaces = interfaces();
         let check_wireless = |iface: &datalink::NetworkInterface| iface.name == iface_name;
         let interface = all_interfaces.into_iter()
-            .find(check_wireless)?;
+            .find(check_wireless)
+            .ok_or(ProtonError::CouldNotFindWirelessInterface)?;
 
         // Get MAC (hardware) address
         let mac = interface.mac;
@@ -74,19 +80,19 @@ impl<'a> NetworkInterface {
         let channel = channel(
             &interface,         // Network interface
             Default::default(), // Configuration info
-        ).ok()?;
+        )?;
 
         // Destructure channel into TX and RX lines
         // Note: the `Channel` enumeration is documented as non-exhaustive
         if let Channel::Ethernet (tx, rx) = channel {
-            Some (Self {
+            Ok (Self {
                 tx: Arc::new(Mutex::new(tx)),
                 rx: Arc::new(Mutex::new(rx)),
                 mac,
                 ipv4,
             })
         } else {
-            None
+            Err (ProtonError::MustBeEthernetInterface)
         }
     }
 

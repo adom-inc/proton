@@ -12,39 +12,40 @@ use std::{
 
 #[derive(Debug)]
 /// An error that occurred within the Proton library.
-/// 
-/// Note: this enumeration is exhaustive because of the `Other` variant.
-pub enum ProtonError<T> 
-    where T: Display + Debug
-{
+pub enum ProtonError {
+    /// The provided interface was not an Ethernet interface, as expected.
+    MustBeEthernetInterface,
+
+    /// The program could not find any wireless network interfaces.
+    CouldNotFindWirelessInterface,
+
     /// An error that could not be converted to a native error.
-    Other (T)
+    Other (String),
 }
 
-impl<T> Display for ProtonError<T>
-    where T: Display + Debug
-{
+impl Display for ProtonError {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         use ProtonError::*;
         let error = match self {
-            Other (t) => t.to_string(),
+            MustBeEthernetInterface => "must be Ethernet interface",
+            CouldNotFindWirelessInterface => "could not find wireless interface",
+            Other (t) => t.as_str(),
         };
 
         write!(f, "{}", error)
     }
 }
 
-impl<T> Error for ProtonError<T>
-    where T: Display + Debug { }
-
-impl From<Box<dyn Error>> for ProtonError<String> {
-    fn from(e: Box<dyn Error>) -> ProtonError<String> {
+impl<T> From<T> for ProtonError
+    where T: Error
+{
+    fn from(e: T) -> ProtonError {
         let string = if let Some (err) = e.source() {
             err.to_string()
         } else {
             String::new()
         };
 
-        ProtonError::<String>::Other (string)
+        ProtonError::Other (string)
     }
 }

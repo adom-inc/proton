@@ -6,10 +6,11 @@ use cidr::Ipv4Cidr;
 
 use pnet::datalink::MacAddr;
 
+use proton_err::ProtonResult;
+
 use crate::{
     ArpCache,
     ArpCacheIterator,
-    ArpResult,
     scan,
 };
 
@@ -45,7 +46,7 @@ impl ArpManager {
     /// 
     /// # Returns
     /// None.
-    pub async fn scan(&mut self) -> ArpResult {
+    pub async fn scan(&mut self) -> ProtonResult<()> {
         let mut addresses = Vec::new();
 
         // Assemble list of addresses to be scanned

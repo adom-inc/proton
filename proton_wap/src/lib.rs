@@ -5,9 +5,4 @@
 
 mod ap;
 
-use std::io;
-
 pub use ap::AccessPoint;
-
-/// Result type for access point operations.
-pub type AccessPointResult<T> = Result<T, io::Error>;

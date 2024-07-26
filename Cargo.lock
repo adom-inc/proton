@@ -364,6 +364,7 @@ version = "0.1.0"
 dependencies = [
  "cidr",
  "pnet",
+ "proton_err",
  "proton_nif",
  "tokio",
 ]
@@ -397,6 +398,7 @@ name = "proton_nif"
 version = "0.1.0"
 dependencies = [
  "pnet",
+ "proton_err",
  "tokio",
 ]
 
