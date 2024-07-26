@@ -20,3 +20,8 @@ pub mod error {
         ProtonResult,
     };
 }
+
+/// Native MAC address structure.
+pub mod mac {
+    pub use proton_mac::MacAddr;
+}
