@@ -378,6 +378,7 @@ dependencies = [
  "nl80211",
  "pnet",
  "proton_arp",
+ "proton_err",
  "serde",
  "serde_json",
 ]

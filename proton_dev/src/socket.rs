@@ -8,7 +8,6 @@ use neli::{
     genl::Genlmsghdr,
     nl::Nlmsghdr,
     nlattr::Nlattr,
-    err::NlError,
 };
 
 use nl80211::{
@@ -20,7 +19,10 @@ use nl80211::{
     NL_80211_GENL_VERSION,
 };
 
-use crate::NetlinkResult;
+use proton_err::{
+    ProtonError,
+    ProtonResult,
+};
 
 /// A wireless AP with a number of connected stations.
 pub trait NetworkSocket {
@@ -31,7 +33,7 @@ pub trait NetworkSocket {
     /// 
     /// # Returns
     /// `NetlinkResult<Vec<Station>>` containing a list of network stations.
-    fn get_all_stations(&mut self, nlif_index: &[u8]) -> NetlinkResult<Vec<Station>>;
+    fn get_all_stations(&mut self, nlif_index: &[u8]) -> ProtonResult<Vec<Station>>;
 
     /// Deauthenticate a device from this AP by MAC address.
     /// 
@@ -47,7 +49,7 @@ impl NetworkSocket for Socket {
     fn get_all_stations(
         &mut self,
         nlif_index: &[u8],
-    ) -> NetlinkResult<Vec<Station>> {
+    ) -> ProtonResult<Vec<Station>> {
         // Get the Netlink socket
         let nl80211sock = &mut self.sock;
 
@@ -97,7 +99,7 @@ impl NetworkSocket for Socket {
 
         while let Some(Ok(response)) = iter.next() {
             match response.nl_type {
-                Nlmsg::Error => return Err (NlError::Msg ("could not get device information".to_string())),
+                Nlmsg::Error => return Err (ProtonError::CouldNotGetDeviceInformation),
                 Nlmsg::Done => break,
                 _ => {
                     let handle = response.nl_payload.get_attr_handle();
@@ -106,7 +108,7 @@ impl NetworkSocket for Socket {
             };
         }
 
-        Ok(results)
+        Ok (results)
     }
 
     fn deauthenticate_by_mac(

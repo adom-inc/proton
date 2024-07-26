@@ -2,8 +2,6 @@
 
 use cidr::Ipv4Cidr;
 
-use neli::err::NlError;
-
 use nl80211::{
     Interface,
     parse_string,
@@ -12,9 +10,13 @@ use nl80211::{
 
 use proton_arp::ArpManager;
 
+use proton_err::{
+    ProtonError,
+    ProtonResult,
+};
+
 use crate::{
     Device,
-    NetlinkResult,
     NetworkSocket,
 };
 
@@ -38,9 +40,9 @@ impl DeviceManager {
     /// - `range` (`Ipv4Cidr`): the CIDR range of the network
     /// 
     /// # Returns
-    /// The result type `NetlinkResult<DeviceManager>` containing the device
+    /// The result type `ProtonResult<DeviceManager>` containing the device
     /// manager, if its initialization was successful.
-    pub fn new(range: Ipv4Cidr) -> NetlinkResult<Self> {
+    pub fn new(range: Ipv4Cidr) -> ProtonResult<Self> {
         Ok (Self {
             socket: Socket::connect()?,
             arp_manager: ArpManager::new(range),
@@ -53,13 +55,11 @@ impl DeviceManager {
     /// - `ifname` (`&str`): the name of the network interface to scan
     /// 
     /// # Returns
-    /// The result type `NetlinkResult<Vec<Device>>` containing a list of
+    /// The result type `ProtonResult<Vec<Device>>` containing a list of
     /// connected devices.
-    pub async fn scan(&mut self, ifname: &str) -> NetlinkResult<Vec<Device>> {
+    pub async fn scan(&mut self, ifname: &str) -> ProtonResult<Vec<Device>> {
         // Perform an ARP scan of the network to get IPs
-        if self.arp_manager.scan().await.is_err() {
-            return Err (NlError::Msg ("could not scan network".to_string()));
-        };
+        self.arp_manager.scan().await?;
 
         // Determine Wi-Fi device by name
         let check_wifi_device = |iface: &Interface| parse_string(&iface.name.clone().unwrap_or_default()) == ifname;
@@ -68,7 +68,7 @@ impl DeviceManager {
         let interface = self.socket.get_interfaces_info()?
             .into_iter()
             .find(check_wifi_device)
-            .ok_or(NlError::Msg ("no wireless interface available".to_string()))?;
+            .ok_or(ProtonError::CouldNotFindWirelessInterface)?;
 
         // Get all stations
         let stations = self.socket.get_all_stations(&interface.index.unwrap())?;

@@ -22,3 +22,6 @@ features = ["derive"]
 
 [dependencies.proton_arp]
 path = "../proton_arp"
+
+[dependencies.proton_err]
+path = "../proton_err"

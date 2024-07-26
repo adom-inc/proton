@@ -19,6 +19,9 @@ pub enum ProtonError {
     /// The program could not find any wireless network interfaces.
     CouldNotFindWirelessInterface,
 
+    /// Could not get device information
+    CouldNotGetDeviceInformation,
+
     /// An error that could not be converted to a native error.
     Other (String),
 }
@@ -29,6 +32,7 @@ impl Display for ProtonError {
         let error = match self {
             MustBeEthernetInterface => "must be Ethernet interface",
             CouldNotFindWirelessInterface => "could not find wireless interface",
+            CouldNotGetDeviceInformation => "could not get wireless device information",
             Other (t) => t.as_str(),
         };
 
