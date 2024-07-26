@@ -12,11 +12,13 @@ use serde::Serialize;
 
 use proton_arp::ArpManager;
 
+use proton_mac::MacAddr;
+
 #[derive(Serialize, Clone, Copy, Debug)]
 /// Information about a connected network device.
 pub struct Device {
     /// MAC address of the device.
-    pub mac: [u8; 6],
+    pub mac: MacAddr,
 
     /// IPv4 address of the device.
     pub ipv4: Ipv4Addr,
@@ -32,13 +34,14 @@ impl Device {
     /// Convert a `Station` into a `Device` by checking the ARP cache.
     pub fn from_station(station: Station, arp: &ArpManager) -> Self {
         // Get hardware address of the station
-        let mac: [u8; 6] = station.bssid
+        let mac: MacAddr = station.bssid
             .unwrap_or_default()
             .try_into()
-            .unwrap_or([0; 6]);
+            .unwrap_or([0; 6])
+            .into();
 
         // Get IPv4 address of the station
-        let ipv4: Ipv4Addr = arp.lookup_mac(mac.into())
+        let ipv4: Ipv4Addr = arp.lookup_mac(mac)
             .unwrap_or(Ipv4Addr::new(0, 0, 0, 0));
 
         // Get signal strength of this station

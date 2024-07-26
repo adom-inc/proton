@@ -365,6 +365,7 @@ dependencies = [
  "cidr",
  "pnet",
  "proton_err",
+ "proton_mac",
  "proton_nif",
  "tokio",
 ]
@@ -379,6 +380,7 @@ dependencies = [
  "pnet",
  "proton_arp",
  "proton_err",
+ "proton_mac",
  "serde",
  "serde_json",
 ]
@@ -392,6 +394,8 @@ name = "proton_mac"
 version = "0.1.0"
 dependencies = [
  "pnet",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

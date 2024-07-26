@@ -3,7 +3,16 @@ name = "proton_mac"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+name = "proton_mac"
+path = "src/lib.rs"
+
+[dependencies]
+serde_json = "1.0.120"
+
 [dependencies.pnet]
 version = "0.35.0"
-default-features = false
-features = ["std"]
+
+[dependencies.serde]
+version = "1.0.204"
+features = ["derive"]

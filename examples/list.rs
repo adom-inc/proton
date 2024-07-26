@@ -12,15 +12,17 @@ use proton::{
 
 #[tokio::main]
 async fn main() -> ProtonResult<()> {
+    let ifname = "wlp4s0";
+
     let mut ap = AccessPoint::new(
         Ipv4Cidr::new(                      // Internal network range
             Ipv4Addr::new(192, 168, 0, 0),  // Network address
             24,                             // Network length
         ).unwrap(),
-        "wlp4s0",
+        ifname,
     )?;
 
-    println!("Scanning network interface: {}...", "wlp4s0");
+    println!("Scanning network interface: {}...", ifname);
 
     let devices: Vec<Device> = ap.scan().await?;
 

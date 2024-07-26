@@ -68,7 +68,7 @@ pub async fn listen(
         // Construct cache entry
         let entry = ArpCacheEntry::new(
             arp_packet.get_sender_proto_addr(),
-            arp_packet.get_sender_hw_addr(),
+            arp_packet.get_sender_hw_addr().into(),
         );
 
         // Send the reply

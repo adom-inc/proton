@@ -4,9 +4,9 @@ use std::net::Ipv4Addr;
 
 use cidr::Ipv4Cidr;
 
-use pnet::datalink::MacAddr;
-
 use proton_err::ProtonResult;
+
+use proton_mac::MacAddr;
 
 use crate::{
     ArpCache,

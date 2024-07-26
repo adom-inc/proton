@@ -25,3 +25,6 @@ path = "../proton_arp"
 
 [dependencies.proton_err]
 path = "../proton_err"
+
+[dependencies.proton_mac]
+path = "../proton_mac"

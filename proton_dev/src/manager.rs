@@ -68,7 +68,7 @@ impl DeviceManager {
         self.arp_manager.scan().await?;
 
         // Determine Wi-Fi device by name
-        let check_wifi_device = |iface: &Interface| parse_string(&iface.name.clone().unwrap_or_default()) == self.wlifname;
+        let check_wifi_device = |iface: &Interface| parse_string(&iface.name.clone().unwrap_or_default()).trim_end_matches('\0') == self.wlifname;
 
         // Get the Wi-Fi device
         let interface = self.socket.get_interfaces_info()?

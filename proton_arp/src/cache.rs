@@ -9,7 +9,7 @@ use std::{
     },
 };
 
-use pnet::datalink::MacAddr;
+use proton_mac::MacAddr;
 
 #[derive(Clone)]
 /// An address resolution cache.
