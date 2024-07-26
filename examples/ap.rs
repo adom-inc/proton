@@ -6,7 +6,6 @@ use cidr::Ipv4Cidr;
 
 use proton::AccessPoint;
 
-
 #[tokio::main]
 async fn main() {
     let mut ap = AccessPoint::new(
