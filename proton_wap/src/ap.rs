@@ -2,7 +2,10 @@
 
 use cidr::Ipv4Cidr;
 
-use proton_dev::DeviceManager;
+use proton_dev::{
+    Device,
+    DeviceManager,
+};
 
 use proton_err::ProtonResult;
 
@@ -33,6 +36,19 @@ impl AccessPoint {
             range,
             manager: DeviceManager::new(range)?,
         })
+    }
+
+    /// Get a list of all connected devices.
+    /// 
+    /// # Parameters
+    /// - `ifname` (`&str`): the name of the wireless network interface to
+    /// scan
+    /// 
+    /// # Returns
+    /// A `ProtonResult<Vec<Device>>` wrappping the list of devices, if
+    /// the network scan was successful.
+    pub async fn scan(&mut self, ifname: &str) -> ProtonResult<Vec<Device>> {
+        Ok (self.manager.scan(ifname).await?)
     }
 
     /// Continuously route packets, monitoring both the Data Link Layer and
