@@ -90,7 +90,6 @@ impl ArpManager {
     /// An `Option<Ipv4Addr>` containing to the provided MAC address, if available.
     pub fn lookup_mac(&self, mac: MacAddr) -> Option<Ipv4Addr> {
         for entry in self.cache() {
-            println!("{} == {} ?", entry.mac, mac);
             if entry.mac == mac {
                 return Some (entry.ipv4);
             }
