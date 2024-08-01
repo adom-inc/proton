@@ -15,7 +15,7 @@ use proton_err::{
     ProtonResult,
 };
 
-use proton_mac::MacAddr;
+// use proton_mac::MacAddr;
 
 use crate::{
     Device,
@@ -89,16 +89,16 @@ impl DeviceManager {
         Ok (devices)
     }
 
-    /// Deauthenticate a device by its MAC address.
-    /// 
-    /// # Parameters
-    /// - `mac` (`MacAddr`): the MAC address of the device to be
-    /// deauthenticated
-    /// 
-    /// # Returns
-    /// A `ProtonResult<()>` indicating whether or not the device was
-    /// successfully deauthenticated.
-    pub fn deauthenticate(&mut self, mac: MacAddr) -> ProtonResult<()> {
-        self.socket.deauthenticate_by_mac(mac)
-    }
+    // /// Deauthenticate a device by its MAC address.
+    // /// 
+    // /// # Parameters
+    // /// - `mac` (`MacAddr`): the MAC address of the device to be
+    // /// deauthenticated
+    // /// 
+    // /// # Returns
+    // /// A `ProtonResult<()>` indicating whether or not the device was
+    // /// successfully deauthenticated.
+    // pub fn deauthenticate(&mut self, mac: MacAddr) -> ProtonResult<()> {
+    //     self.socket.deauthenticate_by_mac(mac)
+    // }
 }

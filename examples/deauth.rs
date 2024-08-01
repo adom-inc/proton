@@ -33,5 +33,7 @@ async fn main() -> ProtonResult<()> {
 
     ap.deauth(deauth_mac)?;
 
+    println!("MAC address {} deauthenticated", deauth_mac);
+
     Ok (())
 }
