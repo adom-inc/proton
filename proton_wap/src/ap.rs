@@ -9,6 +9,8 @@ use proton_dev::{
 
 use proton_err::ProtonResult;
 
+use crate::HotspotConfig;
+
 // use proton_mac::MacAddr;
 
 /// A wireless access point.
@@ -43,6 +45,11 @@ impl AccessPoint {
         })
     }
 
+    /// Start a new hotspot on this access point.
+    pub async fn start(&mut self, config: HotspotConfig) -> ProtonResult<()> {
+        
+    }
+
     /// Get a list of all connected devices.
     /// 
     /// # Parameters
@@ -54,30 +61,4 @@ impl AccessPoint {
     pub async fn scan(&mut self) -> ProtonResult<Vec<Device>> {
         Ok (self.manager.scan().await?)
     }
-
-    // /// Deauthenticate a device by its MAC address.
-    // /// 
-    // /// # Parameters
-    // /// - `mac` (`MacAddr`): the MAC address of the device to be
-    // /// deauthenticated
-    // ///
-    // /// # Returns
-    // /// A `ProtonResult<()>` indicating the status of the response.
-    // pub fn deauth(&mut self, mac: MacAddr) -> ProtonResult<()> {
-    //     self.manager.deauthenticate(mac)
-    // } 
-
-    // /// Continuously route packets, monitoring both the Data Link Layer and
-    // /// the Transport Layer to ensure both proper NAT and MAC policy enforcement.
-    // /// 
-    // /// # Parameters
-    // /// None.
-    // /// 
-    // /// # Returns
-    // /// A `ProtonResult<()>` indicating an error, if one occurred.
-    // /// 
-    // /// This function does not return during nominal operation.
-    // pub async fn run(&mut self) -> ProtonResult<()> {
-    //     todo!()
-    // }
 }

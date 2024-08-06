@@ -30,6 +30,9 @@ pub enum ProtonError {
     /// Could not deauthenticate device by MAC address.
     CouldNotDeauthenticateDevice (MacAddr),
 
+    /// Could not parse into CIDR range.
+    CouldNotParseAsCidr (String),
+
     /// An error that could not be converted to a native error.
     Other (String),
 }
@@ -42,6 +45,7 @@ impl Display for ProtonError {
             CouldNotFindWirelessInterface => "could not find wireless interface",
             CouldNotGetDeviceInformation => "could not get wireless device information",
             NoResponseFromNetlink => "no response from Netlink",
+            CouldNotParseAsCidr (cidr) => &format!("could not parse '{}' into a valid CIDR range", cidr),
             CouldNotDeauthenticateDevice (mac) => &format!("could not deauthenticate device with MAC address {}", mac),
             Other (t) => t.as_str(),
         };
