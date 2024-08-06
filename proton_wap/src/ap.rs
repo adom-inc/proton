@@ -73,7 +73,7 @@ impl AccessPoint {
         let (connection, _state) = wifi_device.create_hotspot_advanced::<str>(
             config.ssid.as_str(),
             Some (config.pass.as_str()),
-            Some (config.gateway),
+            config.gateway,
             config.security.as_str(),
             config.band.as_str(),
         )?;

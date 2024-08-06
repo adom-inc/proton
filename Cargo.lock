@@ -276,7 +276,7 @@ dependencies = [
 [[package]]
 name = "network-manager"
 version = "0.13.3"
-source = "git+https://github.com/adom-inc/network-manager#f61487f6ed8c0176cce440af0b39278e15f44558"
+source = "git+https://github.com/adom-inc/network-manager#7f5ec5d8b4885eefce28b5b322dceb4ff9e07bb5"
 dependencies = [
  "ascii",
  "bitflags 1.3.2",
