@@ -5,10 +5,8 @@
 
 /// Access point utilities.
 pub mod ap {
-    pub use proton_wap::{
-        AccessPoint,
-        HotspotConfig,
-    };
+    pub use proton_cfg::HotspotConfig;
+    pub use proton_wap::AccessPoint;
 }
 
 /// CIDR network range structure.

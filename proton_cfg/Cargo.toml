@@ -1,0 +1,10 @@
+[package]
+name = "proton_cfg"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cidr = "0.2.3"
+
+[dependencies.proton_err]
+path = "../proton_err"

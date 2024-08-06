@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
     "proton_arp",
+    "proton_cfg",
     "proton_dev",
     "proton_err",
     "proton_mac",
@@ -26,6 +27,9 @@ features = ["full"]
 
 [dependencies.proton_arp]
 path = "proton_arp"
+
+[dependencies.proton_cfg]
+path = "proton_cfg"
 
 [dependencies.proton_err]
 path = "proton_err"

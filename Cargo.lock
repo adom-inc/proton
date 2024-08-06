@@ -350,6 +350,7 @@ dependencies = [
  "cidr",
  "pnet",
  "proton_arp",
+ "proton_cfg",
  "proton_dev",
  "proton_err",
  "proton_mac",
@@ -368,6 +369,14 @@ dependencies = [
  "proton_mac",
  "proton_nif",
  "tokio",
+]
+
+[[package]]
+name = "proton_cfg"
+version = "0.1.0"
+dependencies = [
+ "cidr",
+ "proton_err",
 ]
 
 [[package]]
