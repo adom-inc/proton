@@ -18,6 +18,9 @@ pub enum ProtonError {
     /// The provided interface was not an Ethernet interface, as expected.
     MustBeEthernetInterface,
 
+    /// The hotspot has not yet been initialized.
+    HotspotNotInitialized,
+
     /// The program could not find any wireless network interfaces.
     CouldNotFindWirelessInterface,
 
@@ -54,6 +57,7 @@ impl Display for ProtonError {
         use ProtonError::*;
         let error = match self {
             MustBeEthernetInterface => "must be Ethernet interface",
+            HotspotNotInitialized => "hotspot not initialized",
             CouldNotFindWirelessInterface => "could not find wireless interface",
             CouldNotGetDeviceInformation => "could not get wireless device information",
             NoResponseFromNetlink => "no response from Netlink",

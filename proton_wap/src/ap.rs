@@ -27,9 +27,6 @@ pub struct AccessPoint {
 
     /// Hotspot configuration information.
     pub config: HotspotConfig,
-
-    /// NetworkManager connection abstraction for the hotspot.
-    connection: Connection,
 }
 
 impl AccessPoint {
@@ -89,8 +86,22 @@ impl AccessPoint {
         Ok (Self {
             device_manager: DeviceManager::new(config.cidr, wlifname)?,
             config,
-            connection,
         })
+    }
+
+    /// Get the NetworkManager hotspot abstraction.
+    fn get_hotspot(&mut self) -> ProtonResult<Connection> {
+        // Initialize NetworkManager API
+        let nm = NetworkManager::new();
+
+        // Check for hotspot
+        let check_if_ap = |connection: &Connection| connection.settings().mode.as_str() == "ap";
+
+        nm.get_connections()
+            .unwrap_or_default()
+            .into_iter()
+            .find(check_if_ap)
+            .ok_or(ProtonError::HotspotNotInitialized)
     }
 
     /// Activate the hotspot.
@@ -102,7 +113,7 @@ impl AccessPoint {
     /// A `ProtonResult<()>` indicating whether or not the activation
     /// was successful.
     pub async fn activate(&mut self) -> ProtonResult<()> {
-        self.connection.activate()?;
+        self.get_hotspot()?.activate()?;
 
         Ok (())
     }
@@ -116,7 +127,21 @@ impl AccessPoint {
     /// A `ProtonResult<()>` indicating whether or not the deactivation
     /// was successful.
     pub async fn deactivate(&mut self) -> ProtonResult<()> {
-        self.connection.deactivate()?;
+        self.get_hotspot()?.deactivate()?;
+
+        Ok (())
+    }
+
+    /// Delete the hotspot.
+    /// 
+    /// # Parameters
+    /// None.
+    /// 
+    /// # Returns
+    /// A `ProtonResult<()>` indicating whether or not the deletion
+    /// was successful.
+    pub async fn delete(&mut self) -> ProtonResult<()> {
+        self.get_hotspot()?.delete()?;
 
         Ok (())
     }
