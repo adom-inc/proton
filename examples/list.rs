@@ -19,7 +19,7 @@ async fn main() -> ProtonResult<()> {
             24,                             // Network length
         ).unwrap(),
         ifname,                             // Network interface name
-    )?;
+    ).await?;
 
     println!("Scanning network interface: {}...", ifname);
 
