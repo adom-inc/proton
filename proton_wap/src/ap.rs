@@ -25,10 +25,6 @@ pub struct AccessPoint {
     /// Device discovery manager.
     device_manager: DeviceManager,
 
-    #[allow(dead_code)]
-    /// Network manager.
-    network_manager: NetworkManager,
-
     /// Hotspot configuration information.
     pub config: HotspotConfig,
 
@@ -92,7 +88,6 @@ impl AccessPoint {
 
         Ok (Self {
             device_manager: DeviceManager::new(config.cidr, wlifname)?,
-            network_manager: NetworkManager::new(),
             config,
             connection,
         })
