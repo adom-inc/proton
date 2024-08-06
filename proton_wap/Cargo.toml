@@ -8,7 +8,10 @@ name = "proton_wap"
 path = "src/lib.rs"
 
 [dependencies]
-cidr = "0.2.3"
+
+[dependencies.network-manager]
+# TODO: this repo is a fork of an existing repo, once PR is approved we will change this to the existing repo
+git = "https://github.com/adom-inc/network-manager"
 
 [dependencies.pnet]
 version = "0.35.0"
@@ -16,6 +19,9 @@ version = "0.35.0"
 [dependencies.tokio]
 version = "1"
 features = ["full"]
+
+[dependencies.proton_cfg]
+path = "../proton_cfg"
 
 [dependencies.proton_dev]
 path = "../proton_dev"

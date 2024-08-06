@@ -4,7 +4,5 @@
 #![deny(missing_docs)]
 
 mod ap;
-mod hotspot;
 
 pub use ap::AccessPoint;
-pub use hotspot::HotspotConfig;

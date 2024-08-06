@@ -27,11 +27,23 @@ pub enum ProtonError {
     /// Netlink gave no response.
     NoResponseFromNetlink,
 
+    /// Could not activate hotspot after creation.
+    CouldNotActivateHotspot,
+
     /// Could not deauthenticate device by MAC address.
     CouldNotDeauthenticateDevice (MacAddr),
 
     /// Could not parse into CIDR range.
     CouldNotParseAsCidr (String),
+
+    /// CIDR range must contain network gateway.
+    CidrMustContainGateway {
+        /// Provided CIDR network range.
+        cidr: String,
+
+        /// Provided gateway IPv4 address.
+        gateway: String,
+    },
 
     /// An error that could not be converted to a native error.
     Other (String),
@@ -47,6 +59,11 @@ impl Display for ProtonError {
             NoResponseFromNetlink => "no response from Netlink",
             CouldNotParseAsCidr (cidr) => &format!("could not parse '{}' into a valid CIDR range", cidr),
             CouldNotDeauthenticateDevice (mac) => &format!("could not deauthenticate device with MAC address {}", mac),
+            CouldNotActivateHotspot => "could not activate hotspot",
+            CidrMustContainGateway {
+                cidr,
+                gateway,
+            } => &format!("provided CIDR range {} does not contain gateway IPv4 {}", cidr, gateway),
             Other (t) => t.as_str(),
         };
 
