@@ -46,8 +46,8 @@ impl AccessPoint {
     }
 
     /// Start a new hotspot on this access point.
-    pub async fn start(&mut self, config: HotspotConfig) -> ProtonResult<()> {
-        
+    pub async fn start(&mut self, _config: HotspotConfig) -> ProtonResult<()> {
+        todo!()
     }
 
     /// Get a list of all connected devices.
