@@ -10,8 +10,7 @@ path = "src/lib.rs"
 [dependencies]
 
 [dependencies.network-manager]
-# TODO: this repo is a fork of an existing repo, once PR is approved we will change this to the existing repo
-git = "https://github.com/adom-inc/network-manager"
+path = "../network-manager"
 
 [dependencies.pnet]
 version = "0.35.0"

@@ -90,6 +90,13 @@ impl AccessPoint {
     }
 
     /// Get the NetworkManager hotspot abstraction.
+    /// 
+    /// # Parameters
+    /// None.
+    /// 
+    /// # Returns
+    /// A `ProtonResult<Connection>` containing the connection,
+    /// if the method could successfully construct it.
     fn get_hotspot(&mut self) -> ProtonResult<Connection> {
         // Initialize NetworkManager API
         let nm = NetworkManager::new();

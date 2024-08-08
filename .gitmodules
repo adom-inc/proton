@@ -1,0 +1,3 @@
+[submodule "network-manager"]
+	path = network-manager
+	url = https://github.com/adom-inc/network-manager/
