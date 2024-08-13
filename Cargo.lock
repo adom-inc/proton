@@ -588,7 +588,6 @@ dependencies = [
  "proton_cfg",
  "proton_dev",
  "proton_err",
- "proton_mac",
  "proton_nif",
  "tokio",
 ]

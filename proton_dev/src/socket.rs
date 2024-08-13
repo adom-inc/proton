@@ -36,15 +36,6 @@ pub trait NetworkSocket {
     /// # Returns
     /// `ProtonResult<Vec<Station>>` containing a list of network stations.
     fn get_all_stations(&mut self, nlif_index: &[u8]) -> ProtonResult<Vec<Station>>;
-
-    // /// Deauthenticate a device from this AP by MAC address.
-    // /// 
-    // /// # Parameters
-    // /// - `mac` (`MacAddr`): the MAC address to deauthenticate
-    // /// 
-    // /// # Returns
-    // /// `ProtonResult<()>` indicating the status of the disconnection.
-    // fn deauthenticate_by_mac(&mut self, mac: MacAddr) -> ProtonResult<()>;
 }
 
 impl NetworkSocket for Socket {

@@ -4,6 +4,15 @@
 
 An open-source library for Wi-Fi access point management.
 
+## Usage
+
+Add the following to your `Cargo.toml` file.
+
+```
+[dependencies.proton]
+git = "https://github.com/adom-inc/proton.git"
+```
+
 ## License
 
 This project is maintained and developed by Adom Industries, Inc.  It is released to the public as open-source software under the terms of the MIT License (see `LICENSE` for more information).

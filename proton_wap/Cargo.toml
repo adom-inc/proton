@@ -28,8 +28,5 @@ path = "../proton_dev"
 [dependencies.proton_err]
 path = "../proton_err"
 
-[dependencies.proton_mac]
-path = "../proton_mac"
-
 [dependencies.proton_nif]
 path = "../proton_nif"
