@@ -8,6 +8,8 @@ use network_manager::{
     ConnectionState,
 };
 
+use nix::unistd::Uid;
+
 use proton_cfg::HotspotConfig;
 
 use proton_dev::{
@@ -21,6 +23,14 @@ use proton_err::{
 };
 
 /// A wireless access point.
+/// 
+/// **Note**: to construct and use this, you must run the associated
+/// binary with root permissions.  This is because some of the functionality
+/// of the `AccessPoint` structure requires direct control over your
+/// device's network interface.
+/// 
+/// This is enforced by `AccessPoint::new()`, as the constructor will return
+/// a `ProtonError` if you attempt to execute it without root permission.
 pub struct AccessPoint {
     /// Device discovery manager.
     device_manager: DeviceManager,
@@ -44,6 +54,11 @@ impl AccessPoint {
         wlifname: &str,
         config: HotspotConfig,
     ) -> ProtonResult<Self> {
+        // Check if the user is `root`
+        if !Uid::effective().is_root() {
+            return Err (ProtonError::MustHaveRootPermissions);
+        }
+
         // Initialize NetworkManager API
         let network_manager = NetworkManager::new();
 

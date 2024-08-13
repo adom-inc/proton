@@ -39,6 +39,9 @@ pub enum ProtonError {
     /// Could not parse into CIDR range.
     CouldNotParseAsCidr (String),
 
+    /// Root permissions required.
+    MustHaveRootPermissions,
+
     /// CIDR range must contain network gateway.
     CidrMustContainGateway {
         /// Provided CIDR network range.
@@ -57,6 +60,7 @@ impl Display for ProtonError {
         use ProtonError::*;
         let error = match self {
             MustBeEthernetInterface => "must be Ethernet interface",
+            MustHaveRootPermissions => "must execute with root permissions",
             HotspotNotInitialized => "hotspot not initialized",
             CouldNotFindWirelessInterface => "could not find wireless interface",
             CouldNotGetDeviceInformation => "could not get wireless device information",
